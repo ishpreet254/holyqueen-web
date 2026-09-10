@@ -1,0 +1,14 @@
+:root {
+  --midnight: #06111f;
+  --navy: #10233b;
+  --royal: #1d3557;
+  --gold: #f6c967;
+  --gold-strong: #d79b31;
+  --champagne: #fff0bd;
+  --ivory: #fffaf0;
+  --muted: #bac5d1;
+  --glass: rgba(255, 255, 255, 0.075);
+  --line: rgba(246, 201, 103, 0.28);
+  --shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
+  color-scheme: dark;
+}
