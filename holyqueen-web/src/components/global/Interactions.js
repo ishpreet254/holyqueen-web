@@ -166,7 +166,10 @@ export default function Interactions() {
       if (scrollFrame) return;
       scrollFrame = requestAnimationFrame(() => {
         const max = document.documentElement.scrollHeight - window.innerHeight;
-        if (progress) progress.style.width = `${(window.scrollY / max) * 100}%`;
+        if (progress) {
+          const ratio = max > 0 ? window.scrollY / max : 0;
+          progress.style.transform = `scaleX(${Math.min(1, Math.max(0, ratio))})`;
+        }
         scrollFrame = 0;
       });
     };
