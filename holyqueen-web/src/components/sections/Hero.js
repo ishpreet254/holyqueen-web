@@ -50,6 +50,7 @@ export default function Hero() {
           alt="Holy Queen Credit Souhardha Co-operative Society logo"
           width={568}
           height={439}
+          sizes="(max-width: 680px) 84vw, 440px"
           priority
         />
         <p>Assured Growth. Unmatched Peace.</p>

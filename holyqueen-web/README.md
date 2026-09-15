@@ -87,20 +87,3 @@ public/
   wrong `aspect-ratio` on the logo (699/540 instead of the image's
   actual 568/439) and a `.vault-transition` element that had lost its
   `position: absolute` when the dead intro CSS around it was removed.
-
-## Second performance pass — scroll & compositing
-
-- **Scroll progress bar was animating `width` on every scroll frame**,
-  which forces a layout reflow each time. Switched it to
-  `transform: scaleX()`, which the GPU can composite without ever
-  touching layout — the standard fix for scroll-linked bars.
-- **`backdrop-filter: blur(22px)` was shared across ~23 elements
-  site-wide** (every glass panel, scheme card, plan card, service
-  card, the nav bar, testimonial card, map card, contact panels,
-  accordion) — a well-known glassmorphism performance trap, and the
-  most likely source of any scroll jank, since the always-visible
-  fixed nav bar alone was re-blurring its backdrop on every scroll
-  tick. Cut all six blur radii roughly in half (22px/20px/18px →
-  10-12px). The backdrop behind these cards is mostly a smooth dark
-  gradient, so the visual "frosted glass" look is essentially
-  unchanged at the lower radius, but the GPU has far less work to do.

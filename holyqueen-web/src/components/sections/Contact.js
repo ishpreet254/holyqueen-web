@@ -81,19 +81,8 @@ export default function Contact() {
             Request Callback
           </button>
           {showConfirmation && (
-            <div
-              style={{
-                display: "block",
-                marginTop: "12px",
-                padding: "12px 16px",
-                borderRadius: "8px",
-                background: "rgba(255,200,100,0.12)",
-                border: "1px solid rgba(255,200,100,0.3)",
-                color: "#ffd97a",
-                fontSize: "0.9rem",
-              }}
-            >
-              ✅ Opening WhatsApp &amp; SMS — your request is being sent!
+            <div className="form-confirmation" role="status">
+              Opening WhatsApp and SMS. Your request is being sent.
             </div>
           )}
         </form>

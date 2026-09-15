@@ -47,7 +47,9 @@ export default function Nav() {
         <button
           className={`menu-toggle${open ? " active" : ""}`}
           type="button"
-          aria-label="Open menu"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="mobile-menu"
           onClick={() => setOpen((prev) => !prev)}
         >
           <span></span>
@@ -56,6 +58,7 @@ export default function Nav() {
       </header>
 
       <nav
+        id="mobile-menu"
         className={`mobile-menu${open ? " open" : ""}`}
         aria-label="Mobile navigation"
       >

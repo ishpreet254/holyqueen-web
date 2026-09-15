@@ -9,6 +9,8 @@ export default function Location() {
         <iframe
           title="Holy Queen Mysuru map"
           loading="lazy"
+          width="1180"
+          height="470"
           referrerPolicy="no-referrer-when-downgrade"
           src="https://www.google.com/maps?q=No-2916,%20Kanth%20Raja%20Urs%20Road,%20Saraswathipuram,%20Mysuru-570009&output=embed"
         ></iframe>

@@ -22,7 +22,7 @@ const TESTIMONIALS = [
 
 export default function Testimonials() {
   const [index, setIndex] = useState(0);
-  const timerRef = useRef(null);
+  const sectionRef = useRef(null);
 
   const goTo = (nextIndex) => {
     setIndex(
@@ -31,16 +31,47 @@ export default function Testimonials() {
   };
 
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setIndex((current) => (current + 1) % TESTIMONIALS.length);
-    }, 6400);
-    return () => clearInterval(timerRef.current);
+    const section = sectionRef.current;
+    if (!section) return undefined;
+
+    let timerId = 0;
+    let visible = false;
+
+    const stopTimer = () => {
+      window.clearInterval(timerId);
+      timerId = 0;
+    };
+
+    const refreshTimer = () => {
+      stopTimer();
+      if (!visible || document.hidden) return;
+      timerId = window.setInterval(() => {
+        setIndex((current) => (current + 1) % TESTIMONIALS.length);
+      }, 6400);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        refreshTimer();
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(section);
+
+    document.addEventListener("visibilitychange", refreshTimer);
+
+    return () => {
+      stopTimer();
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", refreshTimer);
+    };
   }, []);
 
   const current = TESTIMONIALS[index];
 
   return (
-    <section className="testimonials section" id="testimonials">
+    <section className="testimonials section" id="testimonials" ref={sectionRef}>
       <div className="section-heading centered reveal">
         <span className="eyebrow">Customer Voices</span>
         <h2>Calm confidence from people investing for real milestones.</h2>
