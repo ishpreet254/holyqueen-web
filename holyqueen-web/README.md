@@ -63,3 +63,27 @@ public/
   deep-link behavior.
 - Update the branch phone number, email, and map address in
   `Contact.js` / `Location.js` if these details change.
+
+## Performance pass
+
+- Removed ~360 lines of dead CSS from an earlier "vault door" intro
+  design (locks, rings, energy fields, fog) that had been superseded
+  but never deleted from the original file — it was force-hidden with
+  `display: none` yet still parsed on every page load.
+- The logo went through `pngquant` (271KB → 84KB) and both `<img>`
+  uses now go through `next/image`, which serves a responsive WebP
+  (~36KB at typical sizes) with automatic lazy-loading and sizing.
+- Ambient audio no longer eagerly downloads (~960KB) on page load —
+  `preload="none"` — since it's opt-in via the sound toggle.
+- The hero particle canvas now waits until the intro finishes before
+  it starts (no point animating something hidden behind the intro
+  overlay), and fully pauses via `IntersectionObserver` whenever it's
+  scrolled out of view or the tab is backgrounded, instead of running
+  forever in the background.
+- Tilt and magnetic hover effects used to call `getBoundingClientRect()`
+  on every `pointermove` event, forcing a layout reflow each time.
+  They now cache the rect once on hover-enter instead.
+- Fixed a couple of small visual bugs surfaced during this pass: a
+  wrong `aspect-ratio` on the logo (699/540 instead of the image's
+  actual 568/439) and a `.vault-transition` element that had lost its
+  `position: absolute` when the dead intro CSS around it was removed.

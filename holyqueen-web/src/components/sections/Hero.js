@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function Hero() {
   return (
     <section className="hero section">
@@ -42,14 +44,13 @@ export default function Hero() {
         </div>
       </div>
       <div className="hero-medallion reveal">
-        <img
+        <Image
           className="brand-logo brand-logo-hero"
           src="/logo/holy-queen-logo.png"
           alt="Holy Queen Credit Souhardha Co-operative Society logo"
-          width="699"
-          height="540"
-          loading="eager"
-          decoding="async"
+          width={568}
+          height={439}
+          priority
         />
         <p>Assured Growth. Unmatched Peace.</p>
         <button className="audio-toggle" type="button" aria-pressed="false">

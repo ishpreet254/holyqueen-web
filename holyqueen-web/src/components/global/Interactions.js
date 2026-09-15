@@ -246,21 +246,31 @@ export default function Interactions() {
     cleanupFns.push(() => counterObserver.disconnect());
 
     // ─── Tilt cards ───────────────────────────────────────────────────────
+    // Cache the bounding rect on pointerenter instead of recalculating it on
+    // every pointermove — getBoundingClientRect() forces a synchronous layout
+    // read, and cards don't reflow while hovered, so recomputing it on every
+    // mouse-move event was pure wasted work (and a source of jank on hover).
     const tiltHandlers = [];
     document.querySelectorAll(".tilt").forEach((card) => {
+      let rect = null;
+      const onEnter = () => {
+        rect = card.getBoundingClientRect();
+      };
       const onMove = (event) => {
-        if (reduceMotion) return;
-        const rect = card.getBoundingClientRect();
+        if (reduceMotion || !rect) return;
         const x = ((event.clientX - rect.left) / rect.width - 0.5) * 12;
         const y = ((event.clientY - rect.top) / rect.height - 0.5) * -12;
         card.style.transform = `rotateY(${x}deg) rotateX(${y}deg) translateY(-6px)`;
       };
       const onLeave = () => {
+        rect = null;
         card.style.transform = "";
       };
+      card.addEventListener("pointerenter", onEnter);
       card.addEventListener("pointermove", onMove);
       card.addEventListener("pointerleave", onLeave);
       tiltHandlers.push(() => {
+        card.removeEventListener("pointerenter", onEnter);
         card.removeEventListener("pointermove", onMove);
         card.removeEventListener("pointerleave", onLeave);
       });
@@ -270,19 +280,25 @@ export default function Interactions() {
     // ─── Magnetic buttons ───────────────────────────────────────────────
     const magneticHandlers = [];
     document.querySelectorAll(".magnetic").forEach((button) => {
+      let rect = null;
+      const onEnter = () => {
+        rect = button.getBoundingClientRect();
+      };
       const onMove = (event) => {
-        if (reduceMotion) return;
-        const rect = button.getBoundingClientRect();
+        if (reduceMotion || !rect) return;
         const x = (event.clientX - rect.left - rect.width / 2) * 0.18;
         const y = (event.clientY - rect.top - rect.height / 2) * 0.18;
         button.style.transform = `translate(${x}px, ${y}px)`;
       };
       const onLeave = () => {
+        rect = null;
         button.style.transform = "";
       };
+      button.addEventListener("pointerenter", onEnter);
       button.addEventListener("pointermove", onMove);
       button.addEventListener("pointerleave", onLeave);
       magneticHandlers.push(() => {
+        button.removeEventListener("pointerenter", onEnter);
         button.removeEventListener("pointermove", onMove);
         button.removeEventListener("pointerleave", onLeave);
       });
@@ -290,6 +306,9 @@ export default function Interactions() {
     cleanupFns.push(() => magneticHandlers.forEach((fn) => fn()));
 
     // ─── Hero canvas particles ────────────────────────────────────────────
+    // Fully pauses (cancels the rAF loop, doesn't just skip drawing) whenever
+    // the canvas is off-screen or the tab is hidden, and never starts drawing
+    // while it's hidden behind the intro overlay in the first place.
     function setupParticles(canvas, options) {
       if (!canvas) return () => {};
       const context = canvas.getContext("2d");
@@ -297,7 +316,8 @@ export default function Interactions() {
       const mediaQuery = window.matchMedia("(max-width: 680px)");
       let animationId = 0;
       let lastFrame = 0;
-      let stopped = false;
+      let running = false;
+      let allowedToRun = !options.waitForIntro;
       let width = 0;
       let height = 0;
 
@@ -326,10 +346,7 @@ export default function Interactions() {
       }
 
       function draw(time = 0) {
-        if (stopped || document.hidden) {
-          animationId = requestAnimationFrame(draw);
-          return;
-        }
+        if (!running) return;
         if (time - lastFrame < options.frameMs) {
           animationId = requestAnimationFrame(draw);
           return;
@@ -351,6 +368,20 @@ export default function Interactions() {
         animationId = requestAnimationFrame(draw);
       }
 
+      let isIntersecting = false;
+      function refreshRunState() {
+        const shouldRun =
+          allowedToRun && isIntersecting && !document.hidden && !reduceMotion;
+        if (shouldRun && !running) {
+          running = true;
+          lastFrame = 0;
+          animationId = requestAnimationFrame(draw);
+        } else if (!shouldRun && running) {
+          running = false;
+          cancelAnimationFrame(animationId);
+        }
+      }
+
       resize();
       seed();
       const onResize = () => {
@@ -358,25 +389,46 @@ export default function Interactions() {
         seed();
       };
       window.addEventListener("resize", onResize);
-      if (!reduceMotion) {
-        animationId = requestAnimationFrame(draw);
-      }
+
+      const visibilityObserver = new IntersectionObserver(
+        ([entry]) => {
+          isIntersecting = entry.isIntersecting;
+          refreshRunState();
+        },
+        { threshold: 0 }
+      );
+      visibilityObserver.observe(canvas);
+
+      const onVisibilityChange = () => refreshRunState();
+      document.addEventListener("visibilitychange", onVisibilityChange);
 
       let onIntroEnd;
-      if (options.stopAfterIntro && intro) {
+      if (options.waitForIntro && intro) {
         onIntroEnd = () => {
-          stopped = true;
-          cancelAnimationFrame(animationId);
-          canvas.width = 1;
-          canvas.height = 1;
+          allowedToRun = true;
+          refreshRunState();
         };
         intro.addEventListener("transitionend", onIntroEnd, { once: true });
       }
 
+      let onIntroStop;
+      if (options.stopAfterIntro && intro) {
+        onIntroStop = () => {
+          allowedToRun = false;
+          refreshRunState();
+          canvas.width = 1;
+          canvas.height = 1;
+        };
+        intro.addEventListener("transitionend", onIntroStop, { once: true });
+      }
+
       return () => {
         window.removeEventListener("resize", onResize);
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+        visibilityObserver.disconnect();
         cancelAnimationFrame(animationId);
         if (onIntroEnd) intro?.removeEventListener("transitionend", onIntroEnd);
+        if (onIntroStop) intro?.removeEventListener("transitionend", onIntroStop);
       };
     }
 
@@ -390,6 +442,10 @@ export default function Interactions() {
         mobileCount: 34,
         density: 15,
         frameMs: 42,
+        // The intro overlay fully covers the screen at load, so there's no
+        // point burning frames on hero particles nobody can see yet — wait
+        // until the intro finishes before this loop starts at all.
+        waitForIntro: true,
       }
     );
     cleanupFns.push(stopHeroParticles);

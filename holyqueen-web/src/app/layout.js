@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
         <audio
           id="ambient-audio"
           src="/audio/ambient.mp3"
-          preload="auto"
+          preload="none"
           loop
           data-volume="0.12"
         ></audio>
