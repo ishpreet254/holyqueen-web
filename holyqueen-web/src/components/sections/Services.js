@@ -1,29 +1,28 @@
-const SERVICES = [
-  "RTGS / NEFT",
-  "Money Transfer",
-  "Insurance Services",
-  "PAN Card Services",
-  "Bond & E-Stamping",
-  "Health Cards",
-];
+import Link from "next/link";
+import SectionHeading from "@/components/ui/SectionHeading";
+import { services } from "@/content/services";
 
 export default function Services() {
   return (
     <section className="services section" id="services">
-      <div className="section-heading reveal">
-        <span className="eyebrow">Additional Services</span>
-        <h2>
-          Branch services for daily banking, documents, and insurance
-          support.
-        </h2>
-      </div>
+      <SectionHeading
+        eyebrow="Additional services"
+        title="Everyday banking, documents and insurance at the counter."
+      />
       <div className="service-grid">
-        {SERVICES.map((service) => (
-          <article className="service-card reveal" key={service}>
-            {service}
-          </article>
+        {services.slice(0, 6).map((service) => (
+          <Link
+            className="service-card reveal"
+            href={`/services#${service.slug}`}
+            key={service.slug}
+          >
+            {service.title}
+          </Link>
         ))}
       </div>
+      <p className="section-more">
+        <Link href="/services">All branch services →</Link>
+      </p>
     </section>
   );
 }

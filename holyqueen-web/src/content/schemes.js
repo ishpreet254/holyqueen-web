@@ -1,0 +1,43 @@
+export const schemes = [
+  {
+    slug: "laksha-sulthan",
+    title: "Laksha Sulthan Scheme",
+    deposit: "₹2,500 per month",
+    tenure: "36 months",
+    returns: "₹1,05,580 + ₹1,000 bonus",
+    suits: "Members building a one-lakh milestone from a fixed monthly habit.",
+  },
+  {
+    slug: "asha-kirana-nidhi",
+    title: "Asha Kirana Nidhi Scheme",
+    deposit: "₹1,250 per month",
+    tenure: "36 months",
+    returns: "₹50,998 + ₹500 bonus",
+    suits: "A lighter monthly commitment with the same three-year horizon.",
+  },
+  {
+    slug: "chinara-kanasina-nidhi",
+    title: "Chinara Kanasina Nidhi Scheme",
+    deposit: "₹500 per month",
+    tenure: "60 months",
+    returns: "₹40,014 at 11% p.a.",
+    suits: "Long-horizon saving for a child's education or a family goal.",
+  },
+  {
+    slug: "queen-cash-certificate",
+    title: "Queen Cash Certificate (QCC)",
+    deposit: "₹1,00,000 (in multiples)",
+    tenure: "90 months",
+    returns: "₹1,00,000 becomes ₹2,00,151*",
+    suits: "Doubling a lump sum with nothing to manage in between.",
+    featured: true,
+  },
+  {
+    slug: "monthly-pension-scheme",
+    title: "Monthly Pension Scheme (MPS)",
+    deposit: "₹1,20,000 once",
+    tenure: "3 years",
+    returns: "₹1,000 every month at 10%",
+    suits: "Members who want predictable monthly income from a single deposit.",
+  },
+];

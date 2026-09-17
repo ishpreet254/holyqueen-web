@@ -1,0 +1,60 @@
+export const services = [
+  {
+    slug: "rtgs-neft",
+    title: "RTGS / NEFT",
+    body: "Send and receive funds through the national payment rails, handled at the branch counter.",
+    bring: "Account details of the beneficiary and your passbook.",
+    group: "digital",
+  },
+  {
+    slug: "cheque-clearance",
+    title: "Cheque Clearance",
+    body: "Collection and clearing of cheques for members.",
+    group: "banking",
+  },
+  {
+    slug: "money-transfer",
+    title: "Money Transfer",
+    body: "Inward and outward remittance through Western Union, MoneyGram and Ria.",
+    bring: "Photo ID and the transfer reference number.",
+    group: "digital",
+  },
+  {
+    slug: "lic-premium",
+    title: "LIC Premium Collection Point",
+    body: "Pay your LIC premiums at the branch instead of travelling to a service centre.",
+    bring: "Policy number and the premium notice.",
+    group: "insurance",
+  },
+  {
+    slug: "bond-e-stamping",
+    title: "Bond Paper & E-Stamping",
+    body: "Bond paper and e-stamping for agreements, affidavits and registrations.",
+    group: "documents",
+  },
+  {
+    slug: "general-insurance",
+    title: "General Insurance",
+    body: "Vehicle, health, stock and building cover arranged through the branch.",
+    group: "insurance",
+  },
+  {
+    slug: "pan-card",
+    title: "PAN Card Facility",
+    body: "New PAN applications and corrections processed for members.",
+    bring: "Proof of identity, address and date of birth.",
+    group: "documents",
+  },
+  {
+    slug: "health-cards",
+    title: "Health Cards",
+    body: "Manipal and Father Muller health cards available to members.",
+    group: "insurance",
+  },
+  {
+    slug: "yashasvini",
+    title: "Yashasvini Health Insurance Scheme",
+    body: "Enrolment support for the Yashasvini co-operative health scheme.",
+    group: "insurance",
+  },
+];

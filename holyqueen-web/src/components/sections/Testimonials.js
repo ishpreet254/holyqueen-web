@@ -1,81 +1,58 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-const TESTIMONIALS = [
-  {
-    quote:
-      "Holy Queen explained every detail clearly and helped me choose a plan with confidence.",
-    name: "Savitha R.",
-  },
-  {
-    quote:
-      "The monthly pension plan gave my family a simple, predictable income path.",
-    name: "Mahesh K.",
-  },
-  {
-    quote:
-      "Their branch team combines old-fashioned trust with modern communication.",
-    name: "Nandini S.",
-  },
-];
+import { testimonials } from "@/content/policies";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 export default function Testimonials() {
   const [index, setIndex] = useState(0);
   const sectionRef = useRef(null);
 
-  const goTo = (nextIndex) => {
-    setIndex(
-      (nextIndex + TESTIMONIALS.length) % TESTIMONIALS.length
-    );
-  };
-
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return undefined;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return undefined;
+    }
 
-    let timerId = 0;
+    let timer = 0;
     let visible = false;
-
-    const stopTimer = () => {
-      window.clearInterval(timerId);
-      timerId = 0;
+    const stop = () => {
+      window.clearInterval(timer);
+      timer = 0;
     };
-
-    const refreshTimer = () => {
-      stopTimer();
+    const refresh = () => {
+      stop();
       if (!visible || document.hidden) return;
-      timerId = window.setInterval(() => {
-        setIndex((current) => (current + 1) % TESTIMONIALS.length);
+      timer = window.setInterval(() => {
+        setIndex((current) => (current + 1) % testimonials.length);
       }, 6400);
     };
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         visible = entry.isIntersecting;
-        refreshTimer();
+        refresh();
       },
       { threshold: 0.2 }
     );
     observer.observe(section);
-
-    document.addEventListener("visibilitychange", refreshTimer);
-
+    document.addEventListener("visibilitychange", refresh);
     return () => {
-      stopTimer();
+      stop();
       observer.disconnect();
-      document.removeEventListener("visibilitychange", refreshTimer);
+      document.removeEventListener("visibilitychange", refresh);
     };
   }, []);
 
-  const current = TESTIMONIALS[index];
+  const current = testimonials[index];
 
   return (
     <section className="testimonials section" id="testimonials" ref={sectionRef}>
-      <div className="section-heading centered reveal">
-        <span className="eyebrow">Customer Voices</span>
-        <h2>Calm confidence from people investing for real milestones.</h2>
-      </div>
+      <SectionHeading
+        centered
+        eyebrow="Member voices"
+        title="Calm confidence from people saving for real goals."
+      />
       <div className="testimonial-card reveal">
         <p>{current.quote}</p>
         <strong>{current.name}</strong>
@@ -83,14 +60,21 @@ export default function Testimonials() {
           <button
             type="button"
             aria-label="Previous testimonial"
-            onClick={() => goTo(index - 1)}
+            onClick={() =>
+              setIndex((i) => (i - 1 + testimonials.length) % testimonials.length)
+            }
           >
             Prev
           </button>
+          <div className="testimonial-dots" aria-hidden="true">
+            {testimonials.map((item, i) => (
+              <span key={item.name} className={i === index ? "on" : undefined} />
+            ))}
+          </div>
           <button
             type="button"
             aria-label="Next testimonial"
-            onClick={() => goTo(index + 1)}
+            onClick={() => setIndex((i) => (i + 1) % testimonials.length)}
           >
             Next
           </button>

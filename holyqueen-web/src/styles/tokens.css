@@ -1,14 +1,161 @@
+/* ============================================================
+   HOLY QUEEN — DESIGN TOKENS
+   Tier 1: brand primitives (never change per theme)
+   Tier 2: semantic tokens (redefined per theme)
+   Components must only ever reference tier 2.
+   ============================================================ */
+
 :root {
-  --midnight: #06111f;
-  --navy: #10233b;
-  --royal: #1d3557;
-  --gold: #f6c967;
-  --gold-strong: #d79b31;
-  --champagne: #fff0bd;
-  --ivory: #fffaf0;
+  /* ---- tier 1: brand primitives ---- */
+  --brand-navy: #10233b;
+  --brand-midnight: #06111f;
+  --brand-royal: #1d3557;
+  --brand-ink: #0e2137;
+  --brand-gold: #f6c967;
+  --brand-gold-deep: #a9761c;
+  --brand-gold-strong: #d79b31;
+  --brand-champagne: #fff0bd;
+  --brand-ivory: #fffaf0;
+  --brand-paper: #fbf8f2;
+  --brand-sand: #f4efe4;
+
+  /* ---- type & rhythm (theme independent) ---- */
+  --font-sans: "General Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --font-display: "Cormorant Garamond", "Georgia", "Times New Roman", serif;
+  --step-0: clamp(0.95rem, 0.92rem + 0.15vw, 1.02rem);
+  --step-1: clamp(1.1rem, 1rem + 0.4vw, 1.3rem);
+  --step-2: clamp(1.4rem, 1.2rem + 0.9vw, 2rem);
+  --step-3: clamp(1.9rem, 1.5rem + 1.8vw, 3rem);
+  --step-4: clamp(2.4rem, 1.7rem + 3vw, 4.1rem);
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 26px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --t-fast: 160ms var(--ease);
+  --t: 240ms var(--ease);
+  --t-slow: 420ms var(--ease);
+  --shell: 1240px;
+}
+
+/* ============================================================
+   LIGHT THEME — THE DEFAULT
+   Editorial paper: warm ivory ground, navy ink, deep gold accent.
+   Bright brand gold fails contrast on ivory, so the accent here is
+   --brand-gold-deep; bright gold survives only as hairlines/marks.
+   ============================================================ */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --rgb-accent: 169, 118, 28;
+  --rgb-champagne: 14, 33, 55;
+  --rgb-veil: 14, 33, 55;
+  --rgb-azure: 40, 82, 130;
+  --rgb-deep: 14, 33, 55;
+  --rgb-shadow: 20, 34, 52;
+
+  --bg: var(--brand-paper);
+  --bg-alt: var(--brand-sand);
+  --bg-deep: #efe8da;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-inset: #f7f2e8;
+  --surface-hover: #fffdf7;
+
+  --text: #0e2137;
+  --text-muted: #55677c;
+  --text-subtle: #7a8798;
+  --text-on-accent: #fff9ec;
+
+  --border: rgba(14, 33, 55, 0.13);
+  --border-strong: rgba(14, 33, 55, 0.24);
+  --divider: rgba(14, 33, 55, 0.08);
+  --hairline-gold: rgba(169, 118, 28, 0.45);
+
+  --accent: var(--brand-gold-deep);
+  --accent-hover: #8f6215;
+  --accent-deep: #7c5511;
+  --accent-soft: rgba(169, 118, 28, 0.12);
+
+  --shadow-sm: 0 2px 8px rgba(20, 34, 52, 0.05);
+  --shadow-md: 0 12px 32px rgba(20, 34, 52, 0.07);
+  --shadow-lg: 0 28px 64px rgba(20, 34, 52, 0.1);
+  --focus-ring: 0 0 0 3px rgba(169, 118, 28, 0.38);
+
+  --gradient-page: linear-gradient(180deg, #fdfbf6 0%, var(--brand-paper) 45%, #f6f1e6 100%);
+  --gradient-surface: linear-gradient(145deg, #ffffff, #fbf7ef);
+  --gradient-scrim: radial-gradient(circle at 50% 42%, #ffffff 0%, #f2ebdd 70%);
+  --gradient-accent: linear-gradient(120deg, var(--brand-gold-deep), var(--brand-gold-strong));
+
+  /* legacy aliases kept so the ported stylesheet keeps working */
+  --midnight: var(--brand-paper);
+  --navy: #e9e0cd;
+  --royal: #d9cdb4;
+  --gold: var(--brand-gold-deep);
+  --gold-strong: var(--brand-gold-strong);
+  --champagne: #0e2137;
+  --ivory: #0e2137;
+  --muted: #55677c;
+  --glass: #ffffff;
+  --line: rgba(169, 118, 28, 0.3);
+  --shadow: var(--shadow-md);
+}
+
+/* ============================================================
+   DARK THEME — the original palette, promoted into the semantic tier
+   ============================================================ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --rgb-accent: 246, 201, 103;
+  --rgb-champagne: 255, 240, 189;
+  --rgb-veil: 255, 255, 255;
+  --rgb-azure: 87, 151, 204;
+  --rgb-deep: 6, 17, 31;
+  --rgb-shadow: 0, 0, 0;
+
+  --bg: var(--brand-midnight);
+  --bg-alt: #081a2e;
+  --bg-deep: #020509;
+  --surface: rgba(255, 255, 255, 0.075);
+  --surface-raised: rgba(255, 255, 255, 0.1);
+  --surface-inset: rgba(255, 255, 255, 0.05);
+  --surface-hover: rgba(255, 255, 255, 0.12);
+
+  --text: var(--brand-ivory);
+  --text-muted: #bac5d1;
+  --text-subtle: #8fa0b3;
+  --text-on-accent: #07101d;
+
+  --border: rgba(246, 201, 103, 0.28);
+  --border-strong: rgba(246, 201, 103, 0.48);
+  --divider: rgba(255, 255, 255, 0.1);
+  --hairline-gold: rgba(246, 201, 103, 0.55);
+
+  --accent: var(--brand-gold);
+  --accent-hover: var(--brand-champagne);
+  --accent-deep: #805113;
+  --accent-soft: rgba(246, 201, 103, 0.16);
+
+  --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 18px 48px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 30px 90px rgba(0, 0, 0, 0.45);
+  --focus-ring: 0 0 0 3px rgba(246, 201, 103, 0.5);
+
+  --gradient-page: linear-gradient(135deg, #040a13 0%, var(--brand-midnight) 42%, #081a2e 100%);
+  --gradient-surface: linear-gradient(145deg, #0c1d33, #050b14);
+  --gradient-scrim: radial-gradient(circle at 50% 42%, #091828 0%, #020509 70%);
+  --gradient-accent: linear-gradient(120deg, var(--brand-gold), var(--brand-champagne));
+
+  --midnight: var(--brand-midnight);
+  --navy: var(--brand-navy);
+  --royal: var(--brand-royal);
+  --gold: var(--brand-gold);
+  --gold-strong: var(--brand-gold-strong);
+  --champagne: var(--brand-champagne);
+  --ivory: var(--brand-ivory);
   --muted: #bac5d1;
   --glass: rgba(255, 255, 255, 0.075);
   --line: rgba(246, 201, 103, 0.28);
-  --shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
-  color-scheme: dark;
+  --shadow: var(--shadow-lg);
 }

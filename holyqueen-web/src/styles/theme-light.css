@@ -1,0 +1,219 @@
+/* ============================================================
+   LIGHT THEME SURFACE PASS
+   The ported stylesheet was written for glass-on-navy. On paper the
+   same panels need solid surfaces, hairline borders and soft shadows
+   instead of translucency and glow. Scoped to anything that is not
+   explicitly the dark theme, so light stays the default.
+   ============================================================ */
+
+html:not([data-theme="dark"]) body::before {
+  opacity: 0.5;
+  background:
+    radial-gradient(circle at 12% 6%, rgba(var(--rgb-accent), 0.07), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(var(--rgb-azure), 0.05), transparent 24rem);
+}
+
+/* atmosphere that only reads well on a dark ground */
+html:not([data-theme="dark"]) #hero-canvas,
+html:not([data-theme="dark"]) .cursor-glow {
+  display: none;
+}
+
+html:not([data-theme="dark"]) .hero-bg-orbit {
+  opacity: 0.32;
+}
+
+/* ─── header ─────────────────────────────────────────────── */
+html:not([data-theme="dark"]) .nav-shell {
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
+}
+
+html:not([data-theme="dark"]) .desktop-nav a:hover,
+html:not([data-theme="dark"]) .nav-cta:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+html:not([data-theme="dark"]) .mini-crest {
+  background:
+    url("/logo/holy-queen-logo.png") center center / 150% auto no-repeat,
+    #ffffff;
+  box-shadow: none;
+}
+
+html:not([data-theme="dark"]) .menu-toggle {
+  color: var(--text);
+}
+
+html:not([data-theme="dark"]) .mobile-menu {
+  background: #ffffff;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: none;
+}
+
+html:not([data-theme="dark"]) .mobile-menu a {
+  color: var(--text);
+  border-bottom-color: var(--divider);
+}
+
+/* ─── panels and cards ──────────────────────────────────── */
+html:not([data-theme="dark"]) .hero-stats div,
+html:not([data-theme="dark"]) .glass-panel,
+html:not([data-theme="dark"]) .scheme-card,
+html:not([data-theme="dark"]) .plan-card,
+html:not([data-theme="dark"]) .calculator-shell,
+html:not([data-theme="dark"]) .testimonial-card,
+html:not([data-theme="dark"]) .map-shell,
+html:not([data-theme="dark"]) .contact-form,
+html:not([data-theme="dark"]) .contact-panel,
+html:not([data-theme="dark"]) .service-card,
+html:not([data-theme="dark"]) .accordion {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: none;
+}
+
+html:not([data-theme="dark"]) .scheme-card.featured {
+  background: var(--bg-alt);
+  border-color: var(--hairline-gold);
+}
+
+html:not([data-theme="dark"]) .calc-controls,
+html:not([data-theme="dark"]) .calc-result {
+  background: var(--surface-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+html:not([data-theme="dark"]) .accordion-item {
+  color: var(--text);
+}
+
+html:not([data-theme="dark"]) .accordion-panel {
+  color: var(--text-muted);
+}
+
+html:not([data-theme="dark"]) .trust-list span {
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
+}
+
+/* ─── buttons ───────────────────────────────────────────── */
+html:not([data-theme="dark"]) .button,
+html:not([data-theme="dark"]) .testimonial-controls button,
+html:not([data-theme="dark"]) .summary-button {
+  border-color: var(--border-strong);
+  color: var(--text);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+html:not([data-theme="dark"]) .button::before {
+  display: none;
+}
+
+html:not([data-theme="dark"]) .button:hover,
+html:not([data-theme="dark"]) .testimonial-controls button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+html:not([data-theme="dark"]) .button.primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-weight: 700;
+}
+
+html:not([data-theme="dark"]) .button.primary:hover {
+  background: var(--accent-hover);
+  color: var(--text-on-accent);
+}
+
+html:not([data-theme="dark"]) .button.secondary {
+  background: var(--accent-soft);
+  border-color: var(--hairline-gold);
+  color: var(--accent);
+}
+
+html:not([data-theme="dark"]) .button.ghost {
+  background: transparent;
+  box-shadow: none;
+}
+
+html:not([data-theme="dark"]) .nav-cta {
+  border-color: var(--hairline-gold);
+  color: var(--accent);
+}
+
+/* ─── form controls ─────────────────────────────────────── */
+html:not([data-theme="dark"]) input,
+html:not([data-theme="dark"]) select,
+html:not([data-theme="dark"]) textarea {
+  border-color: var(--border);
+  background: #ffffff;
+  color: var(--text);
+}
+
+html:not([data-theme="dark"]) input::placeholder,
+html:not([data-theme="dark"]) textarea::placeholder {
+  color: var(--text-subtle);
+}
+
+html:not([data-theme="dark"]) select option {
+  background: #ffffff;
+  color: var(--text);
+}
+
+html:not([data-theme="dark"]) label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ─── chart, progress, misc ─────────────────────────────── */
+html:not([data-theme="dark"]) .bar {
+  background: linear-gradient(180deg, var(--brand-gold-strong), var(--accent));
+}
+
+html:not([data-theme="dark"]) .progress {
+  background: linear-gradient(90deg, var(--accent), var(--brand-gold-strong));
+  box-shadow: none;
+}
+
+html:not([data-theme="dark"]) .footer {
+  background: var(--bg-alt);
+  border-top: 1px solid var(--divider);
+}
+
+html:not([data-theme="dark"]) .footer p {
+  color: var(--text-muted);
+}
+
+html:not([data-theme="dark"]) .brand strong {
+  color: var(--text);
+}
+
+/* the crest artwork is gold-on-navy, so it keeps its own ground */
+html:not([data-theme="dark"]) .brand-logo-hero {
+  filter: drop-shadow(0 18px 38px rgba(20, 34, 52, 0.18));
+}
+
+html:not([data-theme="dark"]) .vault-intro {
+  background: var(--gradient-scrim);
+}
+
+html:not([data-theme="dark"]) .vault-logo-reveal h1 {
+  color: var(--text);
+  text-shadow: none;
+}
+
+html:not([data-theme="dark"]) .vault-transition {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.95), rgba(var(--rgb-accent), 0.4) 25%, transparent 62%);
+}
