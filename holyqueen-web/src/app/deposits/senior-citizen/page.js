@@ -2,6 +2,7 @@ import PageHero from "@/components/ui/PageHero";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Disclaimer from "@/components/ui/Disclaimer";
 import CTABand from "@/components/ui/CTABand";
+import StickyActions from "@/components/ui/StickyActions";
 import { seniorCitizen } from "@/content/rates";
 
 export const metadata = {
@@ -42,6 +43,7 @@ export default function SeniorCitizenPage() {
       </section>
 
       <CTABand />
+      <StickyActions />
     </>
   );
 }

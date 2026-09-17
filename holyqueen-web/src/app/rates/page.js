@@ -3,6 +3,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import RateTable from "@/components/ui/RateTable";
 import Disclaimer from "@/components/ui/Disclaimer";
 import CTABand from "@/components/ui/CTABand";
+import StickyActions from "@/components/ui/StickyActions";
 import {
   fixedDeposit,
   recurringDeposit,
@@ -102,6 +103,7 @@ export default function RatesPage() {
       </section>
 
       <CTABand title="Confirm today's rate before you deposit." />
+      <StickyActions />
     </>
   );
 }

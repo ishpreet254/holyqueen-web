@@ -3,6 +3,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import FeatureGrid from "@/components/ui/FeatureGrid";
 import Disclaimer from "@/components/ui/Disclaimer";
 import CTABand from "@/components/ui/CTABand";
+import StickyActions from "@/components/ui/StickyActions";
 import { recurringDeposit } from "@/content/rates";
 
 export const metadata = {
@@ -67,6 +68,7 @@ export default function RecurringDepositPage() {
       </section>
 
       <CTABand />
+      <StickyActions />
     </>
   );
 }

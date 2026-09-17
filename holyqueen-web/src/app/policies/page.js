@@ -14,6 +14,16 @@ export default function PoliciesPage() {
   const ready = policies.filter((item) => item.body);
   const pending = policies.filter((item) => !item.body);
 
+  const faq = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: ready.map((item) => ({
+      "@type": "Question",
+      name: item.title,
+      acceptedAnswer: { "@type": "Answer", text: item.body },
+    })),
+  };
+
   return (
     <>
       <PageHero
@@ -38,6 +48,10 @@ export default function PoliciesPage() {
       </section>
 
       <CTABand calculator={false} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faq) }}
+      />
     </>
   );
 }

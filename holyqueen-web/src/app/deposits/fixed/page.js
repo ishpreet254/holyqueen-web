@@ -5,6 +5,7 @@ import RateTable from "@/components/ui/RateTable";
 import FeatureGrid from "@/components/ui/FeatureGrid";
 import Disclaimer from "@/components/ui/Disclaimer";
 import CTABand from "@/components/ui/CTABand";
+import StickyActions from "@/components/ui/StickyActions";
 import { fixedDeposit, seniorCitizen } from "@/content/rates";
 import { kycDocuments } from "@/content/products";
 
@@ -86,6 +87,7 @@ export default function FixedDepositPage() {
       </section>
 
       <CTABand />
+      <StickyActions />
     </>
   );
 }

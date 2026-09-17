@@ -3,6 +3,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import RateTable from "@/components/ui/RateTable";
 import Disclaimer from "@/components/ui/Disclaimer";
 import CTABand from "@/components/ui/CTABand";
+import StickyActions from "@/components/ui/StickyActions";
 import { schemes } from "@/content/schemes";
 
 export const metadata = {
@@ -70,6 +71,7 @@ export default function SpecialSchemesPage() {
       </section>
 
       <CTABand />
+      <StickyActions />
     </>
   );
 }

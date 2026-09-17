@@ -88,3 +88,53 @@ The light theme has not been looked at in a browser — it was built to the toke
 spec and verified only by build and lint. Run `npm run dev`, check the light
 theme on the home page, `/rates` and `/deposits/fixed`, and tell me what reads
 wrong before I do the Phase 6 contrast and polish pass.
+
+---
+
+# Phase 6 pass — accessibility, print, mobile actions
+
+## Contrast audit (WCAG 2.1 AA)
+
+The first light palette failed. Measured against the four light surfaces
+(page ivory, warm-sand band, white card, warm inset), the deep gold
+`#A9761C` came in at 3.46–3.97:1 as body text, and `--text-subtle`
+`#7A8798` at 3.45:1. Both are below the 4.5:1 floor. Fixed by splitting the
+accent in two:
+
+| Token | Light value | Worst ratio | Needs | Result |
+|---|---|---|---|---|
+| `--text` | `#0E2137` | 14.18 | 4.5 | pass |
+| `--text-muted` | `#55677C` | 5.06 | 4.5 | pass |
+| `--text-subtle` | `#5F6A78` | 4.79 | 4.5 | pass |
+| `--accent` (all text, links, table values, button fill) | `#8A6115` | 4.82 | 4.5 | pass |
+| `--accent-hover` | `#6F4B0F` | 6.81 | 4.5 | pass |
+| `--accent-display` (large figures, hairlines, icons only) | `#A9761C` | 3.46 | 3.0 | pass |
+| Button label `#FFF9EC` on `--accent` | — | 5.26 | 4.5 | pass |
+
+Dark theme: `--text` 15.27, `--text-muted` 9.08, `--text-subtle` 5.94,
+`--accent` 10.19, button label 12.23. All pass.
+
+`--accent-display` is used in exactly two rules — `.page-hero-stat strong`
+and `.product-card h2` — both of which render at `--step-3` (30–48px), so
+the 3:1 large-text threshold applies. Don't reuse it at body size.
+
+## Also added
+
+- **Mobile sticky action bar** on the deposit, rates, accounts and loans
+  pages: Call / WhatsApp / Calculate, 56px targets, hidden above 980px.
+- **Print stylesheet.** `/rates` prints clean — chrome, CTAs and footer links
+  drop out, tables get solid borders and avoid page breaks. Branch staff can
+  print the rate card.
+- **Structured data.** `BreadcrumbList` on every inner page,
+  `FAQPage` on `/policies`, alongside the existing `FinancialService` block.
+
+## Still open
+
+- Fonts are still a system stack. `next/font` self-hosting needs a network
+  fetch at build time, which this sandbox blocks — do it on your machine:
+  a display serif for headings plus one sans, two weights.
+- Visual review of the light theme in a browser. The palette is now measured,
+  but measurement isn't taste — the warm-sand bands and the bordered-paper
+  cards need your eye.
+- The `metadataBase` and sitemap base URL are placeholders
+  (`https://holyqueen.example`). Swap in the real domain before launch.

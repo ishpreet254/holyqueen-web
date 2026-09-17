@@ -3,6 +3,7 @@ import PageHero from "@/components/ui/PageHero";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Disclaimer from "@/components/ui/Disclaimer";
 import CTABand from "@/components/ui/CTABand";
+import StickyActions from "@/components/ui/StickyActions";
 import {
   fixedDeposit,
   recurringDeposit,
@@ -123,6 +124,7 @@ export default function DepositsPage() {
       </section>
 
       <CTABand />
+      <StickyActions />
     </>
   );
 }

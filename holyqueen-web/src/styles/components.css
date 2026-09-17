@@ -320,7 +320,7 @@
 }
 .page-hero-stat strong {
   display: block;
-  color: var(--accent);
+  color: var(--accent-display);
   font-family: Georgia, serif;
   font-size: var(--step-3);
   line-height: 1;
@@ -474,7 +474,7 @@
 }
 .product-card h2 {
   margin: 0;
-  color: var(--accent);
+  color: var(--accent-display);
   font-family: Georgia, serif;
   font-size: var(--step-3);
   font-weight: 400;
@@ -1159,5 +1159,80 @@
   .reveal {
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+/* ─── mobile sticky actions ─────────────────────────────── */
+.sticky-actions {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .sticky-actions {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    border-top: 1px solid var(--border);
+    background: var(--surface-raised);
+    box-shadow: 0 -8px 28px rgba(var(--rgb-shadow), 0.14);
+  }
+  .sticky-actions a {
+    min-height: 56px;
+    display: grid;
+    place-items: center;
+    color: var(--text);
+    font-size: 0.88rem;
+  }
+  .sticky-actions a + a {
+    border-left: 1px solid var(--divider);
+  }
+  .sticky-actions a:first-child {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  body:has(.sticky-actions) .footer {
+    padding-bottom: 5.5rem;
+  }
+}
+
+/* ─── print: the rate card is printed at the counter ───── */
+@media print {
+  .utility-bar,
+  .nav-shell,
+  .mobile-menu,
+  .progress,
+  .cursor-glow,
+  .sticky-actions,
+  .cta-band,
+  .page-actions,
+  .footer-grid,
+  .theme-toggle,
+  .breadcrumbs {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .section,
+  .page-hero {
+    padding: 0.6rem 0 !important;
+    width: 100% !important;
+  }
+  .rate-table th,
+  .rate-table td {
+    border-color: #999 !important;
+    color: #000 !important;
+  }
+  .rate-table {
+    page-break-inside: avoid;
+  }
+  a[href]::after {
+    content: "";
   }
 }

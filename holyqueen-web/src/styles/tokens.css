@@ -64,7 +64,7 @@
 
   --text: #0e2137;
   --text-muted: #55677c;
-  --text-subtle: #7a8798;
+  --text-subtle: #5f6a78;
   --text-on-accent: #fff9ec;
 
   --border: rgba(14, 33, 55, 0.13);
@@ -72,15 +72,20 @@
   --divider: rgba(14, 33, 55, 0.08);
   --hairline-gold: rgba(169, 118, 28, 0.45);
 
-  --accent: var(--brand-gold-deep);
-  --accent-hover: #8f6215;
-  --accent-deep: #7c5511;
-  --accent-soft: rgba(169, 118, 28, 0.12);
+  /* Text-safe accent: verified 4.82:1 on the warm-sand band, the worst
+     surface pair, so it clears AA at body size everywhere it is used.
+     --accent-display is the brighter gold, reserved for large figures,
+     hairlines and icons where the 3:1 large-text threshold applies. */
+  --accent: #8a6115;
+  --accent-hover: #6f4b0f;
+  --accent-display: var(--brand-gold-deep);
+  --accent-deep: #5e4210;
+  --accent-soft: rgba(138, 97, 21, 0.1);
 
   --shadow-sm: 0 2px 8px rgba(20, 34, 52, 0.05);
   --shadow-md: 0 12px 32px rgba(20, 34, 52, 0.07);
   --shadow-lg: 0 28px 64px rgba(20, 34, 52, 0.1);
-  --focus-ring: 0 0 0 3px rgba(169, 118, 28, 0.38);
+  --focus-ring: 0 0 0 3px rgba(138, 97, 21, 0.42);
 
   --gradient-page: linear-gradient(180deg, #fdfbf6 0%, var(--brand-paper) 45%, #f6f1e6 100%);
   --gradient-surface: linear-gradient(145deg, #ffffff, #fbf7ef);
@@ -91,13 +96,13 @@
   --midnight: var(--brand-paper);
   --navy: #e9e0cd;
   --royal: #d9cdb4;
-  --gold: var(--brand-gold-deep);
+  --gold: #8a6115;
   --gold-strong: var(--brand-gold-strong);
   --champagne: #0e2137;
   --ivory: #0e2137;
   --muted: #55677c;
   --glass: #ffffff;
-  --line: rgba(169, 118, 28, 0.3);
+  --line: rgba(138, 97, 21, 0.32);
   --shadow: var(--shadow-md);
 }
 
@@ -134,6 +139,7 @@
 
   --accent: var(--brand-gold);
   --accent-hover: var(--brand-champagne);
+  --accent-display: var(--brand-gold);
   --accent-deep: #805113;
   --accent-soft: rgba(246, 201, 103, 0.16);
 

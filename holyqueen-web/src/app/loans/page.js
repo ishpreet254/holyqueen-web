@@ -4,6 +4,7 @@ import FeatureGrid from "@/components/ui/FeatureGrid";
 import GatedNotice from "@/components/ui/GatedNotice";
 import RateTable from "@/components/ui/RateTable";
 import CTABand from "@/components/ui/CTABand";
+import StickyActions from "@/components/ui/StickyActions";
 import { loans } from "@/content/products";
 
 export const metadata = {
@@ -76,6 +77,7 @@ export default function LoansPage() {
         title="Talk to us about what you need to borrow."
         calculator={false}
       />
+      <StickyActions calculator={false} />
     </>
   );
 }

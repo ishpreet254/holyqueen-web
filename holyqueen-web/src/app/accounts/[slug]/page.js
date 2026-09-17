@@ -3,6 +3,7 @@ import PageHero from "@/components/ui/PageHero";
 import SectionHeading from "@/components/ui/SectionHeading";
 import GatedNotice from "@/components/ui/GatedNotice";
 import CTABand from "@/components/ui/CTABand";
+import StickyActions from "@/components/ui/StickyActions";
 import { accounts, kycDocuments } from "@/content/products";
 
 export function generateStaticParams() {
@@ -63,6 +64,7 @@ export default async function AccountPage({ params }) {
       </section>
 
       <CTABand calculator={false} />
+      <StickyActions calculator={false} />
     </>
   );
 }
