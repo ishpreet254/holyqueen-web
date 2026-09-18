@@ -98,6 +98,8 @@ textarea {
 
 .brand-logo-large {
   width: clamp(230px, 38vw, 480px);
+  height: auto;
+  aspect-ratio: 568 / 439;
   animation: medallionTurn 7s ease-in-out infinite;
 }
 
@@ -1202,7 +1204,7 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.6rem;
+  gap: 1.1rem;
   text-align: center;
   opacity: 0;
   transform: translateY(0) scale(0.92);
@@ -1214,6 +1216,8 @@ textarea {
 
 .vault-logo-reveal .brand-logo-large {
   width: min(50vw, 340px);
+  height: auto;
+  aspect-ratio: 568 / 439;
   animation: none;
   filter:
     drop-shadow(0 24px 48px rgba(var(--rgb-shadow),0.55))

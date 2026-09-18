@@ -138,3 +138,46 @@ the 3:1 large-text threshold applies. Don't reuse it at body size.
   cards need your eye.
 - The `metadataBase` and sitemap base URL are placeholders
   (`https://holyqueen.example`). Swap in the real domain before launch.
+
+---
+
+# Phase 7 pass — copy cleanup, intro fix
+
+## Content
+
+Removed the RBI-KYC / Income Tax-TDS compliance claims from `site.js`:
+`"RBI-KYC and Income Tax-TDS compliant"` (assurances list, was on `/about`)
+and `"RBI-KYC Discipline"` (trust chips, was in the Why section). Both were
+plain array entries so nothing else needed to change — the grids just have
+one fewer item each. The actual KYC and TDS **policy pages** (`/policies`,
+the KYC documents list on `/accounts`, `/deposits/fixed`, `/branch`) are
+untouched — that's real content about what members need to bring, not a
+compliance claim, and you didn't ask to lose it. Say the word if you want
+that gone too.
+
+## Intro (root cause of the "shrunk/sandwiched" logo)
+
+`.brand-logo-large` never had a `height` or `aspect-ratio` rule — only
+`width`. The `<Image width={568} height={439}>` tag carries `height="439"`
+as an HTML attribute, and because no CSS declared `height`, the browser used
+that raw 439px as the rendered height while the width was being squeezed
+down to `min(50vw, 340px)` (or, on the ≤680px breakpoint, up to `390px`).
+Width and height were scaling independently, so the medallion rendered
+compressed against a boxy, disproportionate frame — that's the "sandwiched"
+look. Fixed by adding `height: auto; aspect-ratio: 568 / 439;` to both
+`.brand-logo-large` (globals.css, used nowhere else) and the more specific
+`.vault-logo-reveal .brand-logo-large` intro override, matching the pattern
+`.brand-logo` already used correctly. Also opened up the intro's
+kicker/logo/heading/tagline stack from `gap: 0.6rem` to `1.1rem` so they
+read as a composed lockup instead of stacked flush against each other.
+
+## Not verified in a browser
+
+This sandbox has no network, so `npm install` / `npm run dev` can't run
+here — the aspect-ratio fix is a direct read of the CSS cascade (confirmed
+`.brand-logo`'s working pattern vs. `.brand-logo-large`'s missing
+properties), not a screenshot-verified fix. Run `npm run dev` and check the
+intro on a phone-width viewport before you call it done. If specific pages
+or breakpoints still look off on padding once you've seen them, point me at
+which ones and I'll go through them — "every device" isn't something I can
+audit blind without a render.

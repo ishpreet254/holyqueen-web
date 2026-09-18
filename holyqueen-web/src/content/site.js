@@ -56,7 +56,6 @@ export const strengths = [
 export const assurances = [
   "Operating with own capital since inception",
   "Well-equipped branch infrastructure",
-  "RBI-KYC and Income Tax-TDS compliant",
   "Annual statutory and internal audits",
   "Digital transparency with SMS alerts",
 ];
@@ -64,7 +63,6 @@ export const assurances = [
 export const trustChips = [
   "Secure Investments",
   "Transparent Policies",
-  "RBI-KYC Discipline",
   "Fast Approvals",
   "Digital Banking",
   "Trusted Member Support",
