@@ -40,7 +40,7 @@ export default function DigitalPage() {
         </div>
       </section>
 
-      <section className="section" id="sms-alerts">
+      <section className="section band" id="sms-alerts">
         <SectionHeading eyebrow="Transparency" title="SMS alerts and records." />
         <FeatureGrid
           items={[

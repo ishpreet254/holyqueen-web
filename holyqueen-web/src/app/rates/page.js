@@ -34,7 +34,7 @@ export default function RatesPage() {
         stat={{ value: fixedDeposit.headline, label: "highest FD rate p.a." }}
       />
 
-      <section className="section rate-page">
+      <section className="section rate-page band">
         <SectionHeading eyebrow="Fixed deposits" title="Long-term plans." />
         <RateTable
           caption="Regular fixed deposit"

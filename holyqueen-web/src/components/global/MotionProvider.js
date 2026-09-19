@@ -3,8 +3,14 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-/* Runs on every route. Cheap by design: one rAF-throttled scroll handler and
-   two IntersectionObservers that unobserve as soon as they fire. */
+/* Runs on every route. Cheap by design: one rAF-throttled scroll handler
+   drives the progress bar, the counter animation and the section reveal —
+   the reveal used to run on its own IntersectionObserver, but on some
+   browsers (mobile momentum scrolling especially) that callback can lag
+   noticeably behind the actual scroll position, so a section already on
+   screen would render empty until the *next* scroll event nudged the
+   observer to fire. Checking bounding boxes inside the same rAF tick as
+   everything else removes that gap. */
 export default function MotionProvider() {
   const pathname = usePathname();
 
@@ -15,6 +21,21 @@ export default function MotionProvider() {
     const cleanup = [];
 
     const progress = document.querySelector(".progress");
+    let revealTargets = Array.from(
+      document.querySelectorAll(".reveal:not(.visible)")
+    );
+
+    const revealDue = () => {
+      if (!revealTargets.length) return;
+      const vh = window.innerHeight;
+      revealTargets = revealTargets.filter((el) => {
+        const rect = el.getBoundingClientRect();
+        const due = rect.top < vh * 1.15 && rect.bottom > -200;
+        if (due) el.classList.add("visible");
+        return !due;
+      });
+    };
+
     let frame = 0;
     const onScroll = () => {
       if (frame) return;
@@ -22,30 +43,19 @@ export default function MotionProvider() {
         const max = document.documentElement.scrollHeight - window.innerHeight;
         const percent = max > 0 ? window.scrollY / max : 0;
         if (progress) progress.style.transform = `scaleX(${percent})`;
+        revealDue();
         frame = 0;
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
     onScroll();
+    revealDue();
     cleanup.push(() => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(frame);
     });
-
-    const revealObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("visible");
-          revealObserver.unobserve(entry.target);
-        });
-      },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
-    );
-    document
-      .querySelectorAll(".reveal:not(.visible)")
-      .forEach((el) => revealObserver.observe(el));
-    cleanup.push(() => revealObserver.disconnect());
 
     const counterObserver = new IntersectionObserver(
       (entries) => {

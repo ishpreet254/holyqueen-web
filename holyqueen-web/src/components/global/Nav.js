@@ -12,9 +12,14 @@ export default function Nav() {
   const [openIndex, setOpenIndex] = useState(-1);
   const [drawer, setDrawer] = useState(false);
   const [drawerGroup, setDrawerGroup] = useState(-1);
+  const [drawerTop, setDrawerTop] = useState(84);
   const [condensed, setCondensed] = useState(false);
   const headerRef = useRef(null);
+  const drawerRef = useRef(null);
   const closeTimer = useRef(0);
+  /* Index of a dropdown the visitor opened by clicking its arrow. A pinned
+     panel stays open when the pointer leaves; hover panels do not. */
+  const pinned = useRef(-1);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -34,21 +39,48 @@ export default function Nav() {
     };
   }, []);
 
+  /* Lock page scroll behind the menu only where it covers the page (phones and
+     tablets). On desktop it is a small dropdown, so the page stays scrollable
+     and there is no scrollbar-width jump. */
   useEffect(() => {
-    document.body.style.overflow = drawer ? "hidden" : "";
+    const lock = drawer && window.matchMedia("(max-width: 980px)").matches;
+    document.body.style.overflow = lock ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
+    };
+  }, [drawer]);
+
+  /* Keep the menu attached to the bottom edge of the header while it is open —
+     the header is sticky on desktop and moves with the utility bar. */
+  useEffect(() => {
+    if (!drawer) return undefined;
+    const measure = () => {
+      const box = headerRef.current?.getBoundingClientRect();
+      if (box) setDrawerTop(Math.round(box.bottom + 8));
+    };
+    window.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    return () => {
+      window.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
     };
   }, [drawer]);
 
   useEffect(() => {
     const onKey = (event) => {
       if (event.key !== "Escape") return;
+      pinned.current = -1;
       setOpenIndex(-1);
       setDrawer(false);
     };
     const onPointerDown = (event) => {
-      if (!headerRef.current?.contains(event.target)) setOpenIndex(-1);
+      const inside =
+        headerRef.current?.contains(event.target) ||
+        drawerRef.current?.contains(event.target);
+      if (inside) return;
+      pinned.current = -1;
+      setOpenIndex(-1);
+      setDrawer(false);
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onPointerDown);
@@ -58,18 +90,50 @@ export default function Nav() {
     };
   }, []);
 
-  const closeAll = () => {
+  const closePanels = () => {
+    window.clearTimeout(closeTimer.current);
+    pinned.current = -1;
     setOpenIndex(-1);
+  };
+
+  const closeAll = () => {
+    closePanels();
     setDrawer(false);
     setDrawerGroup(-1);
   };
 
+  /* Hover / focus: open straight away, no intent delay. */
   const openPanel = (index) => {
     window.clearTimeout(closeTimer.current);
+    if (pinned.current !== index) pinned.current = -1;
     setOpenIndex(index);
   };
-  const schedulePanelClose = () => {
-    closeTimer.current = window.setTimeout(() => setOpenIndex(-1), 140);
+
+  /* Leaving closes after a very short grace period so the pointer can cross
+     the gap between the label and its panel. Pinned panels stay put. */
+  const schedulePanelClose = (index) => {
+    if (pinned.current === index) return;
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => setOpenIndex(-1), 90);
+  };
+
+  /* Clicking the arrow shows the panel without leaving the page. First click
+     pins it open; a second click closes it. */
+  const toggleFromArrow = (index) => {
+    window.clearTimeout(closeTimer.current);
+    if (openIndex === index && pinned.current === index) {
+      closePanels();
+      return;
+    }
+    pinned.current = index;
+    setOpenIndex(index);
+  };
+
+  const toggleDrawer = () => {
+    const box = headerRef.current?.getBoundingClientRect();
+    if (box) setDrawerTop(Math.round(box.bottom + 8));
+    closePanels();
+    setDrawer((prev) => !prev);
   };
 
   const isActive = (href) =>
@@ -123,34 +187,59 @@ export default function Nav() {
         <nav className="desktop-nav" aria-label="Primary navigation">
           {nav.map((item, index) => {
             const hasPanel = Boolean(item.columns);
+            const isOpen = openIndex === index;
             return (
               <div
                 key={item.label}
-                className={`nav-item${openIndex === index ? " open" : ""}`}
+                className={`nav-item${hasPanel ? " has-panel" : ""}${
+                  isOpen ? " open" : ""
+                }`}
                 onMouseEnter={() => hasPanel && openPanel(index)}
-                onMouseLeave={() => hasPanel && schedulePanelClose()}
+                onMouseLeave={() => hasPanel && schedulePanelClose(index)}
+                onBlur={(event) => {
+                  if (
+                    hasPanel &&
+                    pinned.current !== index &&
+                    !event.currentTarget.contains(event.relatedTarget)
+                  ) {
+                    setOpenIndex((current) => (current === index ? -1 : current));
+                  }
+                }}
               >
                 <Link
                   href={item.href}
                   className={isActive(item.href) ? "active" : undefined}
-                  aria-expanded={hasPanel ? openIndex === index : undefined}
+                  aria-current={isActive(item.href) ? "page" : undefined}
                   onFocus={() => hasPanel && openPanel(index)}
-                  onClick={() => setOpenIndex(-1)}
+                  onClick={closePanels}
                 >
                   {item.label}
-                  {hasPanel && (
-                    <span className="nav-caret" aria-hidden="true">
-                      ⌄
-                    </span>
-                  )}
                 </Link>
 
                 {hasPanel && (
-                  <div
-                    className="mega-panel"
-                    onMouseEnter={() => openPanel(index)}
-                    onMouseLeave={schedulePanelClose}
+                  <button
+                    type="button"
+                    className="nav-caret-btn"
+                    aria-label={`${isOpen ? "Hide" : "Show"} ${item.label} menu`}
+                    aria-haspopup="true"
+                    aria-expanded={isOpen}
+                    onClick={() => toggleFromArrow(index)}
                   >
+                    <svg viewBox="0 0 12 12" aria-hidden="true">
+                      <path
+                        d="M2.5 4.5 6 8l3.5-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                )}
+
+                {hasPanel && (
+                  <div className="mega-panel">
                     <div className="mega-columns">
                       {item.columns.map((column) => (
                         <div key={column.heading}>
@@ -158,10 +247,7 @@ export default function Nav() {
                           <ul>
                             {column.links.map((link) => (
                               <li key={link.href + link.label}>
-                                <Link
-                                  href={link.href}
-                                  onClick={() => setOpenIndex(-1)}
-                                >
+                                <Link href={link.href} onClick={closePanels}>
                                   <span>{link.label}</span>
                                   {link.badge && (
                                     <em className="rate-badge">{link.badge}</em>
@@ -177,7 +263,7 @@ export default function Nav() {
                       <Link
                         className="mega-footer"
                         href={item.footerLink.href}
-                        onClick={() => setOpenIndex(-1)}
+                        onClick={closePanels}
                       >
                         {item.footerLink.label} →
                       </Link>
@@ -189,18 +275,15 @@ export default function Nav() {
           })}
         </nav>
 
-        <a className="nav-cta" href={`tel:${site.phone}`}>
-          Call Branch
-        </a>
-
         <button
           className={`menu-toggle${drawer ? " active" : ""}`}
           type="button"
           aria-label={drawer ? "Close menu" : "Open menu"}
           aria-expanded={drawer}
           aria-controls="mobile-menu"
-          onClick={() => setDrawer((prev) => !prev)}
+          onClick={toggleDrawer}
         >
+          <span></span>
           <span></span>
           <span></span>
         </button>
@@ -208,8 +291,10 @@ export default function Nav() {
 
       <nav
         id="mobile-menu"
+        ref={drawerRef}
         className={`mobile-menu${drawer ? " open" : ""}`}
-        aria-label="Mobile navigation"
+        style={{ "--drawer-top": `${drawerTop}px` }}
+        aria-label="Site menu"
       >
         <div className="mobile-scroll">
           {nav.map((item, index) =>

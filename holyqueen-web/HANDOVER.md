@@ -141,43 +141,84 @@ the 3:1 large-text threshold applies. Don't reuse it at body size.
 
 ---
 
-# Phase 7 pass — copy cleanup, intro fix
+# Visual + bug-fix pass (this round)
 
-## Content
+## Fixed
 
-Removed the RBI-KYC / Income Tax-TDS compliance claims from `site.js`:
-`"RBI-KYC and Income Tax-TDS compliant"` (assurances list, was on `/about`)
-and `"RBI-KYC Discipline"` (trust chips, was in the Why section). Both were
-plain array entries so nothing else needed to change — the grids just have
-one fewer item each. The actual KYC and TDS **policy pages** (`/policies`,
-the KYC documents list on `/accounts`, `/deposits/fixed`, `/branch`) are
-untouched — that's real content about what members need to bring, not a
-compliance claim, and you didn't ask to lose it. Say the word if you want
-that gone too.
+**Hydration error.** The mismatch was Grammarly injecting `data-new-gr-c-s-check-loaded` / `data-gr-ext-installed` onto `<body>` before React hydrated — a browser extension, not a bug in the app. Added `suppressHydrationWarning` to `<body>` in `layout.js`, which is the standard, correct fix for exactly this case (React still hydrates normally; it just stops warning about attributes it doesn't control).
 
-## Intro (root cause of the "shrunk/sandwiched" logo)
+**Hero layout — the real bug.** At ≤680px, `.hero` had `padding: 8rem 0.5rem 3rem` — an 8px side gutter, which is what put the headline in the corner. Fixed to `1.5rem`. Separately, `.hero`, `.section`, `.nav-shell` and `.footer` were using two different shell widths (1180px vs the newer `--shell: 1240px` token), so the hero content didn't line up with the utility bar above it. Unified everything to `--shell`, with a 3rem minimum gutter instead of 2rem across the board.
 
-`.brand-logo-large` never had a `height` or `aspect-ratio` rule — only
-`width`. The `<Image width={568} height={439}>` tag carries `height="439"`
-as an HTML attribute, and because no CSS declared `height`, the browser used
-that raw 439px as the rendered height while the width was being squeezed
-down to `min(50vw, 340px)` (or, on the ≤680px breakpoint, up to `390px`).
-Width and height were scaling independently, so the medallion rendered
-compressed against a boxy, disproportionate frame — that's the "sandwiched"
-look. Fixed by adding `height: auto; aspect-ratio: 568 / 439;` to both
-`.brand-logo-large` (globals.css, used nowhere else) and the more specific
-`.vault-logo-reveal .brand-logo-large` intro override, matching the pattern
-`.brand-logo` already used correctly. Also opened up the intro's
-kicker/logo/heading/tagline stack from `gap: 0.6rem` to `1.1rem` so they
-read as a composed lockup instead of stacked flush against each other.
+**Hero card cropping.** `.hero-medallion` had a hard `min-height: 590px` inside a `.hero` forced to `min-height: 100vh`. On shorter viewports the combined content (logo + 4-line headline + tagline + stat row) exceeded the viewport, and centering pushed the bottom below the fold — which is what your screenshot shows. Fixed by: capping the headline to `max-width: 15ch` at a smaller clamp so it wraps to 2–3 lines instead of 4, dropping the medallion's fixed height in favour of intrinsic sizing with even padding, and changing `.hero` to `min-height: clamp(640px, 94vh, 940px)` so it can never demand more height than a reasonable viewport gives it.
 
-## Not verified in a browser
+**Hero card in light theme.** This was the biggest visual gap — `.hero-medallion` had no light-theme rule at all, so it stayed the dark navy glass card regardless of theme. It now gets its own light treatment: a white-to-sand gradient, a soft shadow instead of a glow, and a thin gold inset border (a "certificate" frame) instead of the dark glass look. The `Assured Growth. Unmatched Peace.` line now sits in navy ink, not gold-on-navy.
 
-This sandbox has no network, so `npm install` / `npm run dev` can't run
-here — the aspect-ratio fix is a direct read of the CSS cascade (confirmed
-`.brand-logo`'s working pattern vs. `.brand-logo-large`'s missing
-properties), not a screenshot-verified fix. Run `npm run dev` and check the
-intro on a phone-width viewport before you call it done. If specific pages
-or breakpoints still look off on padding once you've seen them, point me at
-which ones and I'll go through them — "every device" isn't something I can
-audit blind without a render.
+**Dark-theme dropdown transparency.** `.mega-panel` was inheriting `--surface-raised` (10% white over navy) at 18px blur — see-through enough that hero content behind it stayed legible through the menu, which is a real reading problem, not a stylistic choice. Dark-theme dropdowns and the mobile drawer are now a near-opaque navy gradient (97–99%), with the blur only softening the edge rather than doing the work of hiding what's behind it.
+
+**Light theme was flat.** Three changes: (1) the body background now layers three low-alpha radial washes instead of two very faint ones, so there's a visible warmth gradient across the page rather than a flat fill; (2) a barely-there SVG grain texture (~5% opacity, `mix-blend-mode: multiply`) gives the page a paper-like tooth instead of a screen-flat look — this is a single inline background-image, effectively free at runtime; (3) a new `.band` utility gives specific sections (About, Deposits, Services, the branch/contact band on Home, and one content section each on About, Accounts, Fixed Deposit, Services, Digital, Loans, Rates and Calculators) a full-bleed `--bg-alt` backdrop with a thin gold hairline at the seam, so pages read as alternating bands rather than one continuous sheet. Cards also picked up a subtle warm-white gradient fill (was flat `#ffffff`) and a gold border on hover.
+
+## Also removed
+
+The "RBI-KYC and Income Tax-TDS compliant" line, and the related "RBI-KYC Discipline" chip in the trust-chip list on the home page. The actual KYC/TDS *policy* explanations on `/policies` are untouched — those are member-facing process information, not the marketing claim you flagged.
+
+## Performance
+
+Light theme now runs almost no `backdrop-filter` (only the 10px blur on the nav pill) — the card blur that dark theme uses is explicitly turned off in light mode, so light-theme scrolling has less GPU work, not more, despite looking richer. The grain texture is a single small background-image, not a canvas or JS effect. Dark-theme dropdown blur only runs while a menu is actually open. Full production build still comes in at 24 static routes with no new client JS beyond what was already there.
+
+## Still worth your eyes
+
+I can verify contrast ratios and DOM structure from here, but I can't render a browser in this environment — screenshot the light theme home page, `/deposits/fixed`, and one dropdown open in both themes, and tell me if anything still reads off.
+
+---
+
+# Font build error — fixed
+
+`Module not found: Can't resolve '@fontsource/cormorant-garamond/400.css'` was because the fonts were an npm dependency, and something in your environment (a stale `node_modules`, a registry that didn't have the exact version, or `npm install` not re-run after the last update) left them unresolved.
+
+Fixed properly rather than just re-explaining the install step: the fonts are no longer an npm package at all. The actual `.woff2` files (latin subset, the 7 weights actually used — 124KB total) now live in `public/fonts/` as static assets, loaded through a plain `src/styles/fonts.css` with manual `@font-face` rules. `@fontsource/*` has been removed from `package.json` entirely.
+
+This means:
+- `npm install` no longer needs to fetch anything font-related — one less thing that can fail on a different machine or registry.
+- No dependency on npm registry availability for fonts, ever.
+- If you `git clone` or copy just the project folder, the fonts always come with it.
+
+Verified: production build compiles clean, and the served CSS bundle correctly serves all 7 `.woff2` files at `/fonts/...` with `200`.
+
+If you still see the old error, delete `node_modules` and `package-lock.json` and run `npm install` fresh — the old lockfile from the previous zip is not compatible with this one.
+
+---
+
+# Hero layout, nav and load-speed pass
+
+**Hero was flush against the window edge.** Root cause: `components.css` sets
+`.section { padding: 4.6rem 0 }` and loads *after* `globals.css`, so it silently
+replaced the hero's side padding with 0. The hero is full-bleed but its content
+must sit on the same shell as the nav, so `.hero.section` (higher specificity)
+now owns all hero padding in `components.css`, including the tablet/phone
+overrides. Its side padding uses `max(1.5rem, (100% - var(--shell)) / 2)`,
+the same box the nav uses, so the left edges line up at every width.
+
+**Hero card overflowed and looked off-centre.** `.brand-logo-hero` was
+`min(84vw, 440px)` wide inside a 440px card with ~76px of padding, so the logo
+was wider than the card's content box and dragged the whole grid track to the
+right. The logo is now `width: 100%; max-width: 400px`, and the card's grid
+column is `minmax(0, 1fr)` so nothing can push it wider than the card.
+
+**Nav.** `Home` added first in `content/nav.js` (also shows in the menu). Each
+dropdown label is now a link *plus* a separate arrow button: the arrow opens the
+panel without navigating, a click pins it open, a second click (or outside
+click / Esc) closes it. Hover opens immediately; the panel fades in 110ms
+(was 240ms) and its blur was removed, since the panel is opaque anyway. The
+three-line menu button is now always visible (it animates into an X) and opens
+the full menu as a dropdown under the header on desktop, a sheet on phones.
+Below 1220px the inline links give way to that menu instead of wrapping.
+
+**Load speed.** Hero content is no longer `.reveal` (it waited for hydration
+before fading in) and the hero stats show their final numbers rather than
+counting up from 0. The full-screen logo intro is off by default
+(`INTRO_ENABLED` in `HomeAtmosphere.js`): it covered the page for ~2s on a
+first visit and until hydration on every load. Other `.reveal` blocks fade in
+faster (250ms, 10px travel) and start just before they scroll into view.
+`<html>` also got `suppressHydrationWarning` — the theme script sets
+`data-theme` before React hydrates, which caused a dev-mode mismatch warning
+whenever dark theme was stored.

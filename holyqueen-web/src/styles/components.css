@@ -31,7 +31,7 @@
   font-size: 0.78rem;
 }
 .utility-inner {
-  width: min(var(--shell), calc(100% - 2rem));
+  width: min(var(--shell), calc(100% - 3rem));
   margin: 0 auto;
   min-height: 38px;
   display: flex;
@@ -80,7 +80,7 @@
     position: sticky;
     inset: auto;
     transform: none;
-    width: min(var(--shell), calc(100% - 2rem));
+    width: min(var(--shell), calc(100% - 3rem));
     margin: 0.85rem auto;
     top: 0.85rem;
   }
@@ -99,11 +99,40 @@
 
 .nav-item {
   position: relative;
+  display: flex;
+  align-items: center;
 }
-.nav-caret {
-  margin-left: 0.3rem;
-  font-size: 0.7rem;
-  opacity: 0.7;
+/* label + arrow read as one control, but they are two: the label navigates,
+   the arrow only opens the panel */
+.nav-item.has-panel > a {
+  padding-right: 0.15rem;
+}
+.nav-caret-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 0.15rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.nav-caret-btn svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.15s ease;
+}
+.nav-caret-btn:hover,
+.nav-item.open .nav-caret-btn {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.nav-item.open .nav-caret-btn svg {
+  transform: rotate(180deg);
 }
 .desktop-nav a.active {
   color: var(--accent);
@@ -114,7 +143,7 @@
   top: calc(100% + 0.6rem);
   left: 50%;
   translate: -50% 0;
-  width: max(420px, 34vw);
+  width: max(480px, 36vw);
   padding: 1.4rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -122,15 +151,29 @@
   box-shadow: var(--shadow-lg);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-6px);
-  transition: opacity var(--t), transform var(--t), visibility var(--t);
-  backdrop-filter: blur(18px);
+  transform: translateY(-4px);
+  /* closing: fade first, then drop visibility */
+  transition: opacity 90ms ease-out, transform 90ms ease-out,
+    visibility 0s linear 90ms;
+  z-index: 2;
 }
-.nav-item.open .mega-panel,
-.nav-item:focus-within .mega-panel {
+/* invisible bridge over the gap between the label and the panel, so the
+   pointer never "falls off" on the way down */
+.mega-panel::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -0.9rem;
+  height: 0.9rem;
+}
+/* opening: instant visibility, short fade — no waiting on the pointer */
+.nav-item.open .mega-panel {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+  transition: opacity 110ms ease-out, transform 110ms ease-out,
+    visibility 0s;
 }
 .mega-columns {
   display: grid;
@@ -182,14 +225,70 @@
   font-size: 0.82rem;
 }
 
+/* Seven labels + brand + Call Branch + menu button only fit side by side on
+   a wide window. Never let a label wrap; tighten a little on mid widths and,
+   below that, leave navigation to the three-line menu. */
+.desktop-nav a,
+.nav-cta {
+  white-space: nowrap;
+}
+.nav-cta {
+  margin-left: 0.4rem;
+}
+@media (max-width: 1360px) {
+  .desktop-nav {
+    gap: 0;
+  }
+  .desktop-nav a,
+  .nav-cta {
+    padding-inline: 0.6rem;
+    font-size: 0.84rem;
+  }
+  .nav-item.has-panel > a {
+    padding-right: 0.1rem;
+  }
+  .brand small {
+    max-width: 190px;
+  }
+}
+@media (max-width: 1220px) {
+  .desktop-nav,
+  .nav-cta {
+    display: none;
+  }
+}
+
 /* ─── mobile drawer ──────────────────────────────────────── */
 .mobile-menu {
-  top: 84px;
+  top: var(--drawer-top, 84px);
   bottom: 1rem;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   overflow: hidden;
   background: var(--surface-raised);
   border-color: var(--border);
+  backdrop-filter: none;
+}
+.mobile-menu.open {
+  animation: drawerIn 140ms ease-out;
+}
+@keyframes drawerIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* On wide screens the menu is a dropdown hanging from the right end of the
+   header (under the three-line button), not a full-width sheet. */
+@media (min-width: 981px) {
+  .mobile-menu {
+    left: auto;
+    right: max(1.5rem, calc((100% - var(--shell)) / 2));
+    bottom: auto;
+    width: min(400px, calc(100% - 3rem));
+    max-height: calc(100dvh - var(--drawer-top, 84px) - 1rem);
+    box-shadow: var(--shadow-lg);
+  }
 }
 .mobile-scroll {
   overflow-y: auto;
@@ -276,7 +375,7 @@
 
 /* ─── page hero & breadcrumbs ────────────────────────────── */
 .page-hero {
-  width: min(var(--shell), calc(100% - 2rem));
+  width: min(var(--shell), calc(100% - 3rem));
   margin: 0 auto;
   padding: 3.4rem 0 2.6rem;
 }
@@ -290,7 +389,7 @@
 .page-hero h1 {
   margin: 0.6rem 0 0;
   max-width: 22ch;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: var(--step-4);
   font-weight: 400;
   line-height: 1.05;
@@ -321,7 +420,7 @@
 .page-hero-stat strong {
   display: block;
   color: var(--accent-display);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: var(--step-3);
   line-height: 1;
 }
@@ -356,8 +455,16 @@
 .section {
   padding: 4.6rem 0;
 }
+/* The hero is full-bleed, but its content is held to the same shell as the
+   nav and every other section. `.section` above sets `padding: Xrem 0`, which
+   used to wipe out the hero's side padding and pin the text to the window
+   edge — so the hero owns its padding here, at a higher specificity. `100%`
+   inside padding resolves against the page width (scrollbar excluded), the
+   same box the nav's `calc(100% - 3rem)` uses, so the left edges line up. */
 .hero.section {
-  padding-top: 2.5rem;
+  width: 100%;
+  padding-block: 2.5rem clamp(3rem, 7vh, 5rem);
+  padding-inline: max(1.5rem, calc((100% - var(--shell)) / 2));
 }
 .section-lead {
   margin: 0.9rem 0 0;
@@ -435,7 +542,7 @@
 }
 .tile strong {
   color: var(--text);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.12rem;
 }
 .tile span {
@@ -475,7 +582,7 @@
 .product-card h2 {
   margin: 0;
   color: var(--accent-display);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: var(--step-3);
   font-weight: 400;
   line-height: 1;
@@ -516,7 +623,7 @@
 .feature-card h3 {
   margin: 0.4rem 0 0.6rem;
   color: var(--text);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 400;
 }
@@ -541,7 +648,7 @@
 }
 .chooser-grid h3 {
   margin: 0 0 0.6rem;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 400;
   color: var(--text);
 }
@@ -692,7 +799,7 @@
 }
 .scheme-detail h3 {
   margin: 0 0 1.1rem;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: var(--step-2);
   font-weight: 400;
   color: var(--text);
@@ -740,7 +847,7 @@
 }
 .service-detail h2 {
   margin: 0 0 0.7rem;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.22rem;
   font-weight: 400;
   color: var(--text);
@@ -782,13 +889,13 @@
   border: 1px solid var(--hairline-gold);
   border-radius: 50%;
   color: var(--accent);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.1rem;
   letter-spacing: 0.04em;
 }
 .person-card h2 {
   margin: 0;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 400;
   color: var(--text);
@@ -809,7 +916,7 @@
 /* ─── CTA band & gated notice ───────────────────────────── */
 .cta-band,
 .gated-notice {
-  width: min(var(--shell), calc(100% - 2rem));
+  width: min(var(--shell), calc(100% - 3rem));
   margin: 2rem auto 5rem;
   padding: 2.6rem;
   border: 1px solid var(--border);
@@ -828,7 +935,7 @@
 .cta-band h2,
 .gated-notice h2 {
   margin: 0 0 0.6rem;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: var(--step-2);
   font-weight: 400;
   color: var(--text);
@@ -859,11 +966,10 @@
   border: none;
   background: var(--gradient-surface);
   color: var(--text);
-  cursor: pointer;
   text-align: center;
 }
 .map-placeholder strong {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: 1.1rem;
 }
@@ -988,12 +1094,12 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface-inset);
-  width: min(var(--shell), calc(100% - 2rem));
+  width: min(var(--shell), calc(100% - 3rem));
   margin: 0 auto;
 }
 .calc-teaser h2 {
   margin: 0.5rem 0 0.6rem;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: var(--step-2);
   font-weight: 400;
   color: var(--text);
@@ -1084,7 +1190,7 @@
 .footer-tagline {
   margin-top: 1rem !important;
   color: var(--accent) !important;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
 }
 .footer-base {
   display: grid;
@@ -1125,6 +1231,10 @@
 
 /* ─── responsive ────────────────────────────────────────── */
 @media (max-width: 980px) {
+  /* the header is fixed at this width, so the hero clears it */
+  .hero.section {
+    padding-top: 7.5rem;
+  }
   .section {
     padding: 3.4rem 0;
   }
@@ -1159,6 +1269,9 @@
   .reveal {
     opacity: 1 !important;
     transform: none !important;
+  }
+  .mobile-menu.open {
+    animation: none;
   }
 }
 
@@ -1212,7 +1325,9 @@
   .page-actions,
   .footer-grid,
   .theme-toggle,
-  .breadcrumbs {
+  .breadcrumbs,
+  .section.band::before,
+  .section.band::after {
     display: none !important;
   }
   body {
@@ -1234,5 +1349,39 @@
   }
   a[href]::after {
     content: "";
+  }
+}
+
+/* ============================================================
+   DARK THEME — solid dropdowns
+   The mega-panel previously inherited --surface-raised (10% white on
+   navy) at 18px blur, which read as see-through rather than a menu.
+   Text-bearing overlays need to win outright, not blend with whatever
+   is behind them, so dark mode gets a near-opaque panel instead.
+   ============================================================ */
+:root[data-theme="dark"] .mega-panel {
+  background:
+    linear-gradient(155deg, rgba(16, 35, 59, 0.98), rgba(5, 12, 22, 0.99));
+  border-color: rgba(var(--rgb-accent), 0.38);
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: none;
+}
+
+:root[data-theme="dark"] .mobile-menu {
+  background: linear-gradient(165deg, rgba(14, 31, 53, 0.97), rgba(4, 10, 19, 0.99));
+}
+
+:root[data-theme="dark"] .nav-shell {
+  background: rgba(6, 17, 31, 0.82);
+}
+
+@media (max-width: 680px) {
+  /* matches the 1rem gutter `.section` uses on phones */
+  .hero.section {
+    padding-top: 7rem;
+    padding-bottom: 3rem;
+    padding-inline: 1rem;
   }
 }

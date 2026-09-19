@@ -4,7 +4,7 @@ import { strengths } from "@/content/site";
 
 export default function About() {
   return (
-    <section className="about section" id="about">
+    <section className="about section band" id="about">
       <SectionHeading
         eyebrow="About Holy Queen"
         title="Built on trust, transparency and member growth."

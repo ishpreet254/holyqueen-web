@@ -20,7 +20,7 @@ export default function ServicesPage() {
         actions={[{ href: "/contact", label: "Ask about a service" }]}
       />
 
-      <section className="section">
+      <section className="section band">
         <SectionHeading
           eyebrow="Everything available"
           title="Nine services, one counter."

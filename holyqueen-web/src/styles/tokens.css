@@ -20,7 +20,7 @@
   --brand-sand: #f4efe4;
 
   /* ---- type & rhythm (theme independent) ---- */
-  --font-sans: "General Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
   --font-display: "Cormorant Garamond", "Georgia", "Times New Roman", serif;
   --step-0: clamp(0.95rem, 0.92rem + 0.15vw, 1.02rem);
   --step-1: clamp(1.1rem, 1rem + 0.4vw, 1.3rem);

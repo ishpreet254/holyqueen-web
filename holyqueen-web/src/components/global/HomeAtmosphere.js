@@ -4,15 +4,21 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { site } from "@/content/site";
 
-/* Home-route only. The intro plays once per session; the particle canvas runs
-   only in the dark theme, on pointer-fine viewports, and pauses whenever it
-   scrolls out of view or the tab is hidden. */
+/* Home-route only. The particle canvas runs only in the dark theme, on
+   pointer-fine viewports, and pauses whenever it scrolls out of view or the
+   tab is hidden.
+
+   The full-screen logo intro (once per session) covered the page for ~2s on a
+   first visit, and until hydration on every load. It is off by default so
+   content is there immediately; set INTRO_ENABLED to true to bring it back. */
+const INTRO_ENABLED = false;
+
 export default function HomeAtmosphere() {
   const introRef = useRef(null);
 
   useEffect(() => {
     const intro = introRef.current;
-    if (!intro) return undefined;
+    if (!INTRO_ENABLED || !intro) return undefined;
 
     let seen = false;
     try {
@@ -144,6 +150,8 @@ export default function HomeAtmosphere() {
       observer.disconnect();
     };
   }, []);
+
+  if (!INTRO_ENABLED) return null;
 
   return (
     <div className="vault-intro" ref={introRef} aria-hidden="true">

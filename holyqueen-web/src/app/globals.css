@@ -16,7 +16,7 @@ body {
     radial-gradient(circle at 82% 16%, rgba(var(--rgb-azure),0.18), transparent 26rem),
     var(--gradient-page);
   color: var(--ivory);
-  font-family: "General Sans", "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-sans);
   overflow-x: hidden;
 }
 
@@ -98,13 +98,12 @@ textarea {
 
 .brand-logo-large {
   width: clamp(230px, 38vw, 480px);
-  height: auto;
-  aspect-ratio: 568 / 439;
   animation: medallionTurn 7s ease-in-out infinite;
 }
 
 .brand-logo-hero {
-  width: min(84vw, 440px);
+  width: 100%;
+  max-width: 400px;
   animation: medallionFloat 7s ease-in-out infinite;
 }
 
@@ -120,7 +119,7 @@ textarea {
 
 .vault-sound {
   position: absolute;
-  right: max(1rem, calc((100vw - 1180px) / 2));
+  right: max(1.25rem, calc((100vw - var(--shell)) / 2));
   bottom: 1.1rem;
   z-index: 12;
   min-height: 42px;
@@ -138,7 +137,7 @@ textarea {
   inset: 1rem 50% auto auto;
   transform: translateX(50%);
   z-index: 50;
-  width: min(1180px, calc(100% - 2rem));
+  width: min(var(--shell), calc(100% - 3rem));
   min-height: 70px;
   display: flex;
   align-items: center;
@@ -161,7 +160,7 @@ textarea {
 
 .brand strong {
   display: block;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   color: var(--champagne);
   letter-spacing: 0.08em;
   white-space: nowrap;
@@ -186,7 +185,7 @@ textarea {
   border-radius: 50%;
   border: 1px solid var(--gold);
   color: transparent;
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 800;
   background:
     linear-gradient(rgba(var(--rgb-deep),0.06), rgba(var(--rgb-deep),0.06)),
@@ -209,7 +208,7 @@ textarea {
   color: var(--text);
   font-size: 0.86rem;
   border-radius: 999px;
-  transition: color .25s ease, background .25s ease, transform .25s ease;
+  transition: color .15s ease, background .15s ease;
 }
 
 .desktop-nav a::after {
@@ -220,7 +219,7 @@ textarea {
   bottom: 0.36rem;
   height: 1px;
   background: var(--gold);
-  transition: left .25s ease, right .25s ease;
+  transition: left .18s ease, right .18s ease;
 }
 
 .desktop-nav a:hover::after {
@@ -240,31 +239,48 @@ textarea {
 }
 
 .menu-toggle {
-  display: none;
-  width: 48px;
-  height: 48px;
+  display: inline-grid;
+  place-content: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  padding: 0;
   border: 1px solid var(--line);
   border-radius: 50%;
   background: transparent;
-  color: white;
+  color: var(--gold);
   cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.menu-toggle:hover,
+.menu-toggle.active {
+  background: rgba(var(--rgb-accent),0.12);
+  border-color: rgba(var(--rgb-accent),0.55);
 }
 
 .menu-toggle span {
   display: block;
-  width: 20px;
+  width: 18px;
   height: 2px;
-  margin: 5px auto;
-  background: var(--gold);
-  transition: transform .3s ease;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform .18s ease, opacity .12s ease;
 }
 
-.menu-toggle.active span:first-child {
-  transform: translateY(7px) rotate(45deg);
+/* three bars: the outer two cross into an X, the middle one steps aside */
+.menu-toggle.active span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
 }
 
-.menu-toggle.active span:last-child {
-  transform: translateY(-7px) rotate(-45deg);
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0.2);
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
 }
 
 .mobile-menu {
@@ -294,7 +310,7 @@ textarea {
 
 .section {
   position: relative;
-  width: min(1180px, calc(100% - 2rem));
+  width: min(var(--shell), calc(100% - 3rem));
   margin: 0 auto;
   padding: 7.5rem 0;
   scroll-margin-top: 112px;
@@ -302,13 +318,16 @@ textarea {
 
 .hero {
   width: 100%;
-  min-height: 100vh;
+  min-height: clamp(640px, 94vh, 940px);
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.8fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.85fr);
   align-items: center;
-  gap: 2rem;
-  padding: 9rem max(1rem, calc((100vw - 1180px) / 2)) 5rem;
+  gap: clamp(2rem, 5vw, 4rem);
   overflow: hidden;
+}
+
+.hero-content {
+  min-width: 0;
 }
 
 #hero-canvas {
@@ -330,14 +349,15 @@ textarea {
   background:
     radial-gradient(circle, rgba(var(--rgb-accent),0.16), transparent 50%),
     conic-gradient(from 120deg, transparent, rgba(var(--rgb-accent),0.24), transparent, rgba(var(--rgb-azure),0.18), transparent);
-  filter: blur(0.2px);
+  will-change: transform;
+  pointer-events: none;
   animation: spin 18s linear infinite;
 }
 
 .hero h1,
 .section-heading h2 {
   margin: 0;
-  font-family: "Playfair Display", "Cormorant Garamond", Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 500;
   line-height: 0.96;
   color: var(--champagne);
@@ -345,9 +365,10 @@ textarea {
 }
 
 .hero h1 {
-  max-width: 880px;
+  max-width: 15ch;
   margin-top: 1rem;
-  font-size: clamp(3.4rem, 8vw, 9.4rem);
+  font-size: clamp(2.8rem, 5.4vw, 4.6rem);
+  letter-spacing: -0.01em;
   text-shadow: 0 0 50px rgba(var(--rgb-accent),0.22);
 }
 
@@ -451,7 +472,7 @@ textarea {
 .hero-stats strong {
   display: block;
   color: var(--gold);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 2rem;
 }
 
@@ -461,13 +482,17 @@ textarea {
 }
 
 .hero-medallion {
+  position: relative;
   justify-self: center;
+  align-self: center;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   justify-items: center;
-  gap: 1.2rem;
-  width: min(100%, 470px);
-  min-height: 590px;
-  padding: 3rem 1.5rem;
+  align-content: center;
+  gap: 1.35rem;
+  min-width: 0;
+  width: min(100%, 440px);
+  padding: clamp(2.4rem, 5vw, 3.4rem) clamp(1.6rem, 4vw, 2.4rem);
   border: 1px solid rgba(var(--rgb-accent),0.34);
   border-radius: 32px;
   background:
@@ -478,12 +503,13 @@ textarea {
 }
 
 .hero-medallion p {
-  max-width: 320px;
+  max-width: min(100%, 300px);
+  margin: 0;
   text-align: center;
   color: var(--champagne);
-  font-family: Georgia, serif;
-  font-size: clamp(1.8rem, 4vw, 3.2rem);
-  line-height: 1.05;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.2vw, 2.5rem);
+  line-height: 1.18;
 }
 
 .hero-medallion .brand-logo {
@@ -538,7 +564,7 @@ textarea {
 .plan-card h3 {
   margin: 0.8rem 0 0.5rem;
   color: var(--champagne);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.65rem;
   line-height: 1.05;
 }
@@ -718,7 +744,7 @@ textarea {
   display: block;
   margin-top: 0.35rem;
   color: var(--gold);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: clamp(2.2rem, 5.4vw, 4.6rem);
   line-height: 1;
   overflow-wrap: anywhere;
@@ -798,7 +824,7 @@ textarea {
 }
 
 .accordion-item span {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.25rem;
 }
 
@@ -824,7 +850,7 @@ textarea {
   place-items: end start;
   overflow: hidden;
   color: var(--champagne);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.3rem;
 }
 
@@ -839,7 +865,7 @@ textarea {
 .testimonial-card p {
   margin: 0 0 1rem;
   color: var(--champagne);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: clamp(1.6rem, 4vw, 3.1rem);
   line-height: 1.15;
 }
@@ -933,7 +959,7 @@ textarea {
   position: relative;
   display: grid;
   gap: 1rem;
-  width: min(1180px, calc(100% - 2rem));
+  width: min(var(--shell), calc(100% - 3rem));
   margin: 0 auto;
   padding: 3rem 0 4rem;
   border-top: 1px solid var(--line);
@@ -952,8 +978,8 @@ textarea {
 
 .reveal {
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity .45s ease, transform .55s cubic-bezier(.2,.8,.2,1);
+  transform: translateY(10px);
+  transition: opacity .25s ease-out, transform .3s cubic-bezier(.2,.8,.2,1);
 }
 
 .reveal.visible {
@@ -997,13 +1023,8 @@ textarea {
     display: none;
   }
 
-  .menu-toggle {
-    display: block;
-  }
-
   .hero {
-    grid-template-columns: 1fr;
-    padding-top: 8rem;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .hero-medallion {
@@ -1035,13 +1056,12 @@ textarea {
   }
 
   .section {
-    width: min(100% - 1rem, 1180px);
+    width: min(100% - 2rem, var(--shell));
     padding: 4.8rem 0;
   }
 
   .hero {
     min-height: auto;
-    padding: 8rem 0.5rem 3rem;
   }
 
   .vault-logo-reveal {
@@ -1204,7 +1224,7 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.1rem;
+  gap: 0.6rem;
   text-align: center;
   opacity: 0;
   transform: translateY(0) scale(0.92);
@@ -1216,8 +1236,6 @@ textarea {
 
 .vault-logo-reveal .brand-logo-large {
   width: min(50vw, 340px);
-  height: auto;
-  aspect-ratio: 568 / 439;
   animation: none;
   filter:
     drop-shadow(0 24px 48px rgba(var(--rgb-shadow),0.55))
@@ -1228,7 +1246,7 @@ textarea {
 .vault-logo-reveal h1 {
   margin: 0;
   color: var(--champagne);
-  font-family: Georgia, "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: clamp(0.85rem, 2.1vw, 1.65rem);
   font-weight: 400;
   letter-spacing: 0.22em;
@@ -1239,7 +1257,7 @@ textarea {
 
 .vault-logo-reveal strong {
   color: var(--gold);
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-size: clamp(0.78rem, 1.5vw, 1.1rem);
   font-weight: 500;
   letter-spacing: 0.12em;

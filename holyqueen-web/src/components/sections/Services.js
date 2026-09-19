@@ -4,7 +4,7 @@ import { services } from "@/content/services";
 
 export default function Services() {
   return (
-    <section className="services section" id="services">
+    <section className="services section band" id="services">
       <SectionHeading
         eyebrow="Additional services"
         title="Everyday banking, documents and insurance at the counter."

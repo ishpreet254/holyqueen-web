@@ -21,7 +21,7 @@ export default function CalculatorsPage() {
         stat={{ value: fixedDeposit.headline, label: "highest FD rate p.a." }}
       />
 
-      <section className="section">
+      <section className="section band">
         <Calculators />
         <Disclaimer>
           Calculator output is indicative and rounded. The branch confirms the

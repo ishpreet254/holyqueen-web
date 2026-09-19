@@ -25,7 +25,7 @@ export default function AccountsPage() {
         ]}
       />
 
-      <section className="section">
+      <section className="section band">
         <SectionHeading
           eyebrow="Compare"
           title="Which account suits you?"

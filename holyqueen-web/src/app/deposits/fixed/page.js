@@ -47,7 +47,7 @@ export default function FixedDepositPage() {
         <Disclaimer />
       </section>
 
-      <section className="section">
+      <section className="section band">
         <SectionHeading
           eyebrow="Why this plan"
           title="What a fixed deposit gives you."

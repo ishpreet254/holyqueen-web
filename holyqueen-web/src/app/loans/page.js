@@ -46,7 +46,7 @@ export default function LoansPage() {
         </section>
       )}
 
-      <section className="section">
+      <section className="section band">
         <SectionHeading
           eyebrow="How we lend"
           title="What members can expect."

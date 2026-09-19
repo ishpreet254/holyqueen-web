@@ -9,6 +9,7 @@ export const utilityLinks = [
 ];
 
 export const nav = [
+  { label: "Home", href: "/" },
   {
     label: "Accounts & Deposits",
     href: "/deposits",

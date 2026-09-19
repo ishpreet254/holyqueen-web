@@ -10,14 +10,14 @@ export default function Hero() {
       <canvas id="hero-canvas" aria-hidden="true"></canvas>
       <div className="hero-bg-orbit" aria-hidden="true"></div>
       <div className="hero-content">
-        <div className="eyebrow reveal">{site.positioning}</div>
-        <h1 className="reveal">Grow your wealth with confidence and prestige</h1>
-        <p className="hero-copy reveal">
+        <div className="eyebrow">{site.positioning}</div>
+        <h1>Grow your wealth with confidence and prestige</h1>
+        <p className="hero-copy">
           Trusted deposit schemes, member credit and everyday branch services —
           with transparent terms and a team that explains every figure before
           you commit.
         </p>
-        <div className="hero-actions reveal">
+        <div className="hero-actions">
           <Link className="button primary" href="/deposits">
             Explore deposits
           </Link>
@@ -28,22 +28,22 @@ export default function Hero() {
             Visit branch
           </Link>
         </div>
-        <div className="hero-stats reveal">
+        <div className="hero-stats">
           <div>
-            <strong data-counter={parseFloat(fixedDeposit.headline)}>0</strong>
+            <strong>{parseFloat(fixedDeposit.headline)}</strong>
             <span>% FD plans up to</span>
           </div>
           <div>
-            <strong data-counter={schemes.length}>0</strong>
+            <strong>{schemes.length}</strong>
             <span>signature schemes</span>
           </div>
           <div>
-            <strong data-counter="100">0</strong>
+            <strong>100</strong>
             <span>% audited discipline</span>
           </div>
         </div>
       </div>
-      <div className="hero-medallion reveal">
+      <div className="hero-medallion">
         <Image
           className="brand-logo brand-logo-hero"
           src="/logo/holy-queen-logo.png"

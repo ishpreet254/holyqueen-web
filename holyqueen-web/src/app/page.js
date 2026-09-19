@@ -44,7 +44,7 @@ export default function Home() {
       <Services />
       <Testimonials />
 
-      <section className="branch-band section" id="branch">
+      <section className="branch-band section band" id="branch">
         <SectionHeading
           eyebrow="Branch & enquiry"
           title="Begin with a conversation, then invest with clarity."

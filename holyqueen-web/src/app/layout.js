@@ -1,3 +1,4 @@
+import "../styles/fonts.css";
 import "./globals.css";
 import "../styles/components.css";
 import "../styles/theme-light.css";
@@ -50,11 +51,11 @@ const organisation = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <a className="skip-link" href="#content">
           Skip to content
         </a>

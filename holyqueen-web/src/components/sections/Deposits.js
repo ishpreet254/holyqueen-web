@@ -40,7 +40,7 @@ const PLANS = [
 
 export default function Deposits() {
   return (
-    <section className="deposits section" id="deposits">
+    <section className="deposits section band" id="deposits">
       <SectionHeading
         eyebrow="Deposit plans"
         title="Attractive fixed returns with peace of mind."

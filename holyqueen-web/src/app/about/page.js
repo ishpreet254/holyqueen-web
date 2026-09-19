@@ -47,7 +47,7 @@ export default function AboutPage() {
         )}
       </section>
 
-      <section className="section">
+      <section className="section band">
         <SectionHeading eyebrow="Our strength" title="What members get from us." />
         <FeatureGrid items={strengths} numbered />
       </section>
