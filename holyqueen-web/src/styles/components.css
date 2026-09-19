@@ -1023,6 +1023,14 @@
   font-size: 0.8rem;
   line-height: 1.6;
 }
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.result-actions .summary-button {
+  flex: 1 1 220px;
+}
 
 .comparator {
   padding: 1.8rem;

@@ -2,7 +2,11 @@
    SELF-HOSTED FONTS — static files, no npm package required.
    Files live in /public/fonts. Latin subset only, four weights of
    Plus Jakarta Sans (body) and three of Cormorant Garamond (display),
-   ~124KB total. font-display: swap avoids a blank-text flash.
+   ~124KB total. font-display: optional avoids the layout shift a later
+   font swap causes (e.g. the navbar visibly growing/overflowing as text
+   reflows from the fallback font to the real one) — the browser either
+   has the font in time for first paint or keeps the fallback for this
+   visit, with no reflow either way. It's cached after the first load.
    ============================================================ */
 
 @font-face {
@@ -10,7 +14,7 @@
   src: url("/fonts/cormorant-garamond-latin-400-normal.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -18,7 +22,7 @@
   src: url("/fonts/cormorant-garamond-latin-500-normal.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -26,7 +30,7 @@
   src: url("/fonts/cormorant-garamond-latin-600-normal.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -34,7 +38,7 @@
   src: url("/fonts/plus-jakarta-sans-latin-400-normal.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -42,7 +46,7 @@
   src: url("/fonts/plus-jakarta-sans-latin-500-normal.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -50,7 +54,7 @@
   src: url("/fonts/plus-jakarta-sans-latin-600-normal.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -58,5 +62,5 @@
   src: url("/fonts/plus-jakarta-sans-latin-700-normal.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }

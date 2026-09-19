@@ -36,6 +36,30 @@ export default function MotionProvider() {
       });
     };
 
+    /* Anything mounted after this effect ran (a tab switch, an accordion
+       opening, content a future page adds) wouldn't otherwise be in
+       revealTargets, and would sit at opacity:0 forever since nothing
+       re-queries the DOM for it. Pick up new .reveal nodes as they appear. */
+    const mutationObserver = new MutationObserver((mutations) => {
+      let added = false;
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType !== 1) return;
+          if (node.matches?.(".reveal:not(.visible)")) {
+            revealTargets.push(node);
+            added = true;
+          }
+          node.querySelectorAll?.(".reveal:not(.visible)").forEach((el) => {
+            revealTargets.push(el);
+            added = true;
+          });
+        });
+      });
+      if (added) revealDue();
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    cleanup.push(() => mutationObserver.disconnect());
+
     let frame = 0;
     const onScroll = () => {
       if (frame) return;

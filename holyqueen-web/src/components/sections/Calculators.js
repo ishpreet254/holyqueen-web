@@ -64,7 +64,7 @@ function FixedCalculator() {
   }, [amount, ladderIndex, senior, frequency]);
 
   return (
-    <div className="calculator-shell reveal">
+    <div className="calculator-shell">
       <div className="calc-controls">
         <label>
           Deposit amount
@@ -150,11 +150,17 @@ function FixedCalculator() {
             ></span>
           ))}
         </div>
-        <SendToBranch
+        <ResultActions
+          title="Fixed Deposit — estimate"
+          filename="holy-queen-fd-estimate.txt"
           lines={[
             `Deposit: ${inr(Number(amount) || 0)}`,
             `Tenure: ${result.slab.label}`,
-            `Rate: ${result.rate}%`,
+            `Interest payout: ${
+              COMPOUNDING.find((option) => option.value === frequency)?.label ?? frequency
+            }`,
+            `Rate: ${result.rate}% p.a.`,
+            `Estimated interest: ${inr(result.interest)}`,
             `Estimated maturity: ${inr(result.maturity)}`,
           ]}
         />
@@ -179,7 +185,7 @@ function RecurringCalculator() {
   }, [installment, months]);
 
   return (
-    <div className="calculator-shell reveal">
+    <div className="calculator-shell">
       <div className="calc-controls">
         <label>
           Monthly instalment
@@ -225,10 +231,15 @@ function RecurringCalculator() {
           <span>Rate applied</span>
           <strong>{result.rate}% p.a.</strong>
         </div>
-        <SendToBranch
+        <ResultActions
+          title="Recurring Deposit — estimate"
+          filename="holy-queen-rd-estimate.txt"
           lines={[
             `Monthly instalment: ${inr(Number(installment) || 0)}`,
             `Tenure: ${result.count} months`,
+            `Rate: ${result.rate}% p.a.`,
+            `Total invested: ${inr(result.invested)}`,
+            `Interest earned: ${inr(result.interest)}`,
             `Estimated maturity: ${inr(result.maturity)}`,
           ]}
         />
@@ -249,7 +260,7 @@ function SchemeComparator() {
     Number(scheme.deposit.replace(/[^0-9]/g, "")) || 0;
 
   return (
-    <div className="comparator reveal">
+    <div className="comparator">
       <label className="comparator-input">
         What can you set aside each month?
         <input
@@ -285,23 +296,69 @@ function SchemeComparator() {
         The Queen Cash Certificate and Monthly Pension Scheme take a one-time
         deposit rather than a monthly instalment — see the special schemes page.
       </p>
+      <ResultActions
+        title="Scheme comparison"
+        filename="holy-queen-scheme-comparison.txt"
+        lines={[
+          `Monthly capacity: ${inr(value)}`,
+          ...monthlySchemes.map((scheme) => {
+            const needed = parseMonthly(scheme);
+            return `${scheme.title}: ${scheme.deposit}, ${scheme.tenure}, ${scheme.returns} — ${
+              value >= needed ? "within budget" : `needs ${inr(needed)}/month`
+            }`;
+          }),
+        ]}
+      />
     </div>
   );
 }
 
-function SendToBranch({ lines }) {
+/* Builds a plain-text summary and triggers a browser download — no
+   external library, so it works offline and needs no extra dependency. */
+function downloadReport(filename, title, lines) {
+  const body = [
+    site.legalName,
+    title,
+    "=".repeat(title.length),
+    "",
+    ...lines,
+    "",
+    `Generated from the website calculator on ${new Date().toLocaleDateString("en-IN")}.`,
+    "Figures are estimates for discussion — please confirm exact numbers with the branch.",
+  ].join("\n");
+  const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function ResultActions({ title, filename, lines }) {
   const text = encodeURIComponent(
     [`Hello ${site.shortName},`, "", "I used the calculator on your website:", ...lines, "", "Please confirm the exact figures."].join("\n")
   );
   return (
-    <a
-      className="button primary summary-button"
-      href={`https://wa.me/${site.whatsapp}?text=${text}`}
-      target="_blank"
-      rel="noreferrer"
-    >
-      Send to the branch on WhatsApp
-    </a>
+    <div className="result-actions">
+      <a
+        className="button primary summary-button"
+        href={`https://wa.me/${site.whatsapp}?text=${text}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        Send to the branch on WhatsApp
+      </a>
+      <button
+        type="button"
+        className="button secondary summary-button"
+        onClick={() => downloadReport(filename, title, lines)}
+      >
+        Download report
+      </button>
+    </div>
   );
 }
 
@@ -332,11 +389,16 @@ export default function Calculators() {
           </button>
         ))}
       </div>
+      {/* "reveal" lives here, on the one panel node that survives every tab
+          switch — putting it on each calculator instead (as before) meant
+          switching tabs mounted a brand-new, not-yet-"visible" node with no
+          scroll event left to trigger it, so the panel stayed invisible
+          until a hard refresh re-ran the initial reveal check. */}
       <div
         role="tabpanel"
         id={`panel-${tab}`}
         aria-labelledby={`tab-${tab}`}
-        className="tab-panel"
+        className="tab-panel reveal"
       >
         {tab === "fd" && <FixedCalculator />}
         {tab === "rd" && <RecurringCalculator />}
