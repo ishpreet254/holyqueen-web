@@ -1190,9 +1190,9 @@
   letter-spacing: 0.05em;
   padding: 0.22rem 0.6rem;
   border-radius: 999px;
-  background: var(--accent);
-  color: var(--text-on-accent);
-  font-weight: 800;
+  background: var(--accent) !important;
+  color: var(--text-on-accent) !important;
+  font-weight: 700;
   white-space: nowrap;
 }
 .comparator-yield {
