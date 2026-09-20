@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { fdLadder, seniorUplift, recurringDeposit } from "@/content/rates";
 import { schemes } from "@/content/schemes";
 import { site } from "@/content/site";
+import { downloadFdReport, downloadRdReport, downloadCompareReport } from "@/lib/pdfReport";
 
 const inr = (value) =>
   `₹${Math.round(value).toLocaleString("en-IN")}`;
@@ -55,6 +56,8 @@ function FixedCalculator() {
       useUplift,
       maturity,
       interest: maturity - principal,
+      years,
+      n,
       bars: series.map((value, index) => ({
         key: index,
         height: Math.max(8, (value / max) * 100),
@@ -62,6 +65,9 @@ function FixedCalculator() {
       })),
     };
   }, [amount, ladderIndex, senior, frequency]);
+
+  const frequencyLabel =
+    COMPOUNDING.find((option) => option.value === frequency)?.label ?? frequency;
 
   return (
     <div className="calculator-shell">
@@ -152,17 +158,30 @@ function FixedCalculator() {
         </div>
         <ResultActions
           title="Fixed Deposit — estimate"
-          filename="holy-queen-fd-estimate.txt"
-          lines={[
+          waLines={[
             `Deposit: ${inr(Number(amount) || 0)}`,
             `Tenure: ${result.slab.label}`,
-            `Interest payout: ${
-              COMPOUNDING.find((option) => option.value === frequency)?.label ?? frequency
-            }`,
+            `Interest payout: ${frequencyLabel}`,
             `Rate: ${result.rate}% p.a.`,
             `Estimated interest: ${inr(result.interest)}`,
             `Estimated maturity: ${inr(result.maturity)}`,
           ]}
+          buildPdf={() =>
+            downloadFdReport({
+              amount: Number(amount) || 0,
+              slabLabel: result.slab.label,
+              frequencyLabel,
+              rate: result.rate,
+              years: result.years,
+              compoundingN: result.n,
+              maturity: result.maturity,
+              interest: result.interest,
+              senior,
+              usedUplift: result.useUplift,
+              schemesList: schemes,
+              filename: "holy-queen-fd-report.pdf",
+            })
+          }
         />
       </div>
     </div>
@@ -233,8 +252,7 @@ function RecurringCalculator() {
         </div>
         <ResultActions
           title="Recurring Deposit — estimate"
-          filename="holy-queen-rd-estimate.txt"
-          lines={[
+          waLines={[
             `Monthly instalment: ${inr(Number(installment) || 0)}`,
             `Tenure: ${result.count} months`,
             `Rate: ${result.rate}% p.a.`,
@@ -242,6 +260,18 @@ function RecurringCalculator() {
             `Interest earned: ${inr(result.interest)}`,
             `Estimated maturity: ${inr(result.maturity)}`,
           ]}
+          buildPdf={() =>
+            downloadRdReport({
+              installment: Number(installment) || 0,
+              months: result.count,
+              rate: result.rate,
+              maturity: result.maturity,
+              invested: result.invested,
+              interest: result.interest,
+              schemesList: schemes,
+              filename: "holy-queen-rd-report.pdf",
+            })
+          }
         />
       </div>
     </div>
@@ -298,8 +328,7 @@ function SchemeComparator() {
       </p>
       <ResultActions
         title="Scheme comparison"
-        filename="holy-queen-scheme-comparison.txt"
-        lines={[
+        waLines={[
           `Monthly capacity: ${inr(value)}`,
           ...monthlySchemes.map((scheme) => {
             const needed = parseMonthly(scheme);
@@ -308,39 +337,36 @@ function SchemeComparator() {
             }`;
           }),
         ]}
+        buildPdf={() =>
+          downloadCompareReport({
+            capacity: value,
+            schemesList: schemes,
+            filename: "holy-queen-scheme-comparison.pdf",
+          })
+        }
       />
     </div>
   );
 }
 
-/* Builds a plain-text summary and triggers a browser download — no
-   external library, so it works offline and needs no extra dependency. */
-function downloadReport(filename, title, lines) {
-  const body = [
-    site.legalName,
-    title,
-    "=".repeat(title.length),
-    "",
-    ...lines,
-    "",
-    `Generated from the website calculator on ${new Date().toLocaleDateString("en-IN")}.`,
-    "Figures are estimates for discussion — please confirm exact numbers with the branch.",
-  ].join("\n");
-  const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
-
-function ResultActions({ title, filename, lines }) {
+function ResultActions({ title, waLines, buildPdf }) {
+  const [status, setStatus] = useState("idle"); // idle | working | error
   const text = encodeURIComponent(
-    [`Hello ${site.shortName},`, "", "I used the calculator on your website:", ...lines, "", "Please confirm the exact figures."].join("\n")
+    [`Hello ${site.shortName},`, "", "I used the calculator on your website:", ...waLines, "", "Please confirm the exact figures."].join("\n")
   );
+
+  const handleDownload = async () => {
+    if (status === "working") return;
+    setStatus("working");
+    try {
+      await buildPdf();
+      setStatus("idle");
+    } catch (error) {
+      console.error(`Could not build the ${title} PDF`, error);
+      setStatus("error");
+    }
+  };
+
   return (
     <div className="result-actions">
       <a
@@ -354,10 +380,16 @@ function ResultActions({ title, filename, lines }) {
       <button
         type="button"
         className="button secondary summary-button"
-        onClick={() => downloadReport(filename, title, lines)}
+        onClick={handleDownload}
+        disabled={status === "working"}
       >
-        Download report
+        {status === "working" ? "Preparing PDF…" : "Download report"}
       </button>
+      {status === "error" && (
+        <p className="calc-note" role="alert">
+          The PDF could not be created. Please try again.
+        </p>
+      )}
     </div>
   );
 }
