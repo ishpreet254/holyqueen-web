@@ -5,6 +5,7 @@ import { fdLadder, seniorUplift, recurringDeposit } from "@/content/rates";
 import { schemes } from "@/content/schemes";
 import { site } from "@/content/site";
 import { downloadFdReport, downloadRdReport, downloadCompareReport } from "@/lib/pdfReport";
+import { rankSchemes, pickBestValue, fitsBudget } from "@/lib/schemeMath";
 
 const inr = (value) =>
   `₹${Math.round(value).toLocaleString("en-IN")}`;
@@ -65,6 +66,21 @@ function FixedCalculator() {
       })),
     };
   }, [amount, ladderIndex, senior, frequency]);
+
+  const allSlabs = useMemo(() => {
+    const principal = Math.max(0, Number(amount) || 0);
+    const n = Number(frequency);
+    return fdLadder.map((slab, index) => {
+      const useUplift = senior && slab.days >= 366;
+      const rate = useUplift ? seniorUplift.rate : slab.rate;
+      const years = slab.days / 365;
+      const maturity =
+        n === 0
+          ? principal * (1 + (rate / 100) * years)
+          : principal * Math.pow(1 + rate / 100 / n, n * years);
+      return { index, slab, rate, maturity };
+    });
+  }, [amount, senior, frequency]);
 
   const frequencyLabel =
     COMPOUNDING.find((option) => option.value === frequency)?.label ?? frequency;
@@ -156,6 +172,27 @@ function FixedCalculator() {
             ></span>
           ))}
         </div>
+        <p className="calc-note calc-note-heading">
+          Compare across tenures for the same deposit amount
+        </p>
+        <ul className="tenure-compare">
+          {allSlabs.map((row) => (
+            <li
+              key={row.slab.label}
+              className={row.index === ladderIndex ? "current" : undefined}
+            >
+              <button
+                type="button"
+                className="tenure-compare-select"
+                onClick={() => setLadderIndex(row.index)}
+              >
+                <strong>{row.slab.label}</strong>
+                <span>{row.rate}% p.a.</span>
+              </button>
+              <span className="tenure-compare-value">{inr(row.maturity)}</span>
+            </li>
+          ))}
+        </ul>
         <ResultActions
           title="Fixed Deposit — estimate"
           waLines={[
@@ -202,6 +239,18 @@ function RecurringCalculator() {
     const invested = monthly * count;
     return { maturity, invested, interest: maturity - invested, rate, count };
   }, [installment, months]);
+
+  const allTenures = useMemo(() => {
+    const monthly = Math.max(0, Number(installment) || 0);
+    const rate = Number(recurringDeposit.headline.replace("%", ""));
+    const i = rate / 100 / 12;
+    return RD_TENURES.map((option) => {
+      const count = Number(option.value);
+      const maturity =
+        i === 0 ? monthly * count : monthly * ((Math.pow(1 + i, count) - 1) / i) * (1 + i);
+      return { option, maturity, invested: monthly * count };
+    });
+  }, [installment]);
 
   return (
     <div className="calculator-shell">
@@ -250,6 +299,27 @@ function RecurringCalculator() {
           <span>Rate applied</span>
           <strong>{result.rate}% p.a.</strong>
         </div>
+        <p className="calc-note calc-note-heading">
+          Compare across tenures for the same monthly instalment
+        </p>
+        <ul className="tenure-compare">
+          {allTenures.map((row) => (
+            <li
+              key={row.option.value}
+              className={row.option.value === months ? "current" : undefined}
+            >
+              <button
+                type="button"
+                className="tenure-compare-select"
+                onClick={() => setMonths(row.option.value)}
+              >
+                <strong>{row.option.value} months</strong>
+                <span>invested {inr(row.invested)}</span>
+              </button>
+              <span className="tenure-compare-value">{inr(row.maturity)}</span>
+            </li>
+          ))}
+        </ul>
         <ResultActions
           title="Recurring Deposit — estimate"
           waLines={[
@@ -279,67 +349,166 @@ function RecurringCalculator() {
 }
 
 function SchemeComparator() {
-  const [capacity, setCapacity] = useState(2500);
-  const value = Math.max(0, Number(capacity) || 0);
+  const [monthlyBudget, setMonthlyBudget] = useState(2500);
+  const [lumpSum, setLumpSum] = useState(100000);
+  const [filter, setFilter] = useState("all"); // all | monthly | lumpsum
+  const [sortBy, setSortBy] = useState("value"); // value | returns | tenure | commitment
 
-  const monthlySchemes = schemes.filter((scheme) =>
-    scheme.deposit.includes("per month")
+  const monthlyBudgetNum = Math.max(0, Number(monthlyBudget) || 0);
+  const lumpSumNum = Math.max(0, Number(lumpSum) || 0);
+
+  const ranked = useMemo(() => rankSchemes(schemes), []);
+  const best = useMemo(() => pickBestValue(ranked), [ranked]);
+
+  const withFit = useMemo(
+    () =>
+      ranked.map((scheme) => ({
+        ...scheme,
+        fits: fitsBudget(scheme, { monthlyBudget: monthlyBudgetNum, lumpSum: lumpSumNum }),
+      })),
+    [ranked, monthlyBudgetNum, lumpSumNum]
   );
 
-  const parseMonthly = (scheme) =>
-    Number(scheme.deposit.replace(/[^0-9]/g, "")) || 0;
+  const visible = useMemo(() => {
+    const filtered = withFit.filter((s) => filter === "all" || s.type === filter);
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "returns":
+          return (b.totalValue ?? 0) - (a.totalValue ?? 0);
+        case "tenure":
+          return (a.months ?? Infinity) - (b.months ?? Infinity);
+        case "commitment":
+          return (a.monthlyDeposit ?? a.lumpDeposit ?? Infinity) - (b.monthlyDeposit ?? b.lumpDeposit ?? Infinity);
+        case "value":
+        default:
+          return (b.effectiveAnnualPct ?? -Infinity) - (a.effectiveAnnualPct ?? -Infinity);
+      }
+    });
+    return sorted;
+  }, [withFit, filter, sortBy]);
 
   return (
     <div className="comparator">
-      <label className="comparator-input">
-        What can you set aside each month?
-        <input
-          type="number"
-          inputMode="numeric"
-          min="0"
-          step="100"
-          value={capacity}
-          onChange={(event) => setCapacity(event.target.value)}
-        />
-      </label>
+      <div className="comparator-inputs">
+        <label className="comparator-input">
+          Monthly budget
+          <input
+            type="number"
+            inputMode="numeric"
+            min="0"
+            step="100"
+            value={monthlyBudget}
+            onChange={(event) => setMonthlyBudget(event.target.value)}
+          />
+        </label>
+        <label className="comparator-input">
+          One-time amount available
+          <input
+            type="number"
+            inputMode="numeric"
+            min="0"
+            step="1000"
+            value={lumpSum}
+            onChange={(event) => setLumpSum(event.target.value)}
+          />
+        </label>
+      </div>
+
+      <div className="comparator-toolbar">
+        <div className="filter-pills" role="tablist" aria-label="Filter schemes">
+          {[
+            { id: "all", label: "All schemes" },
+            { id: "monthly", label: "Monthly plans" },
+            { id: "lumpsum", label: "One-time deposits" },
+          ].map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={filter === option.id ? "active" : undefined}
+              onClick={() => setFilter(option.id)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <select
+          className="sort-select"
+          value={sortBy}
+          onChange={(event) => setSortBy(event.target.value)}
+          aria-label="Sort schemes by"
+        >
+          <option value="value">Sort: Best value first</option>
+          <option value="returns">Sort: Highest total returns</option>
+          <option value="tenure">Sort: Shortest tenure first</option>
+          <option value="commitment">Sort: Lowest commitment first</option>
+        </select>
+      </div>
+
       <ul className="comparator-list">
-        {monthlySchemes.map((scheme) => {
-          const needed = parseMonthly(scheme);
-          const fits = value >= needed;
+        {visible.map((scheme) => {
+          const isBest = best && scheme.slug === best.slug;
           return (
-            <li key={scheme.slug} className={fits ? "fits" : undefined}>
+            <li key={scheme.slug} className={[scheme.fits ? "fits" : null, isBest ? "best" : null].filter(Boolean).join(" ") || undefined}>
               <div>
-                <strong>{scheme.title}</strong>
+                <div className="scheme-meta">
+                  <strong>{scheme.title}</strong>
+                  <span className="scheme-type-pill">
+                    {scheme.type === "monthly" ? "Monthly" : "One-time"}
+                  </span>
+                  {isBest && <span className="best-badge">Best value</span>}
+                </div>
                 <span>
                   {scheme.deposit} · {scheme.tenure}
                 </span>
+                {scheme.effectiveAnnualPct != null && (
+                  <span className="comparator-yield">
+                    Effective yield ~{scheme.effectiveAnnualPct.toFixed(1)}% p.a.
+                  </span>
+                )}
               </div>
               <div className="comparator-return">
                 <strong>{scheme.returns}</strong>
-                <span>{fits ? "Within your budget" : `Needs ${inr(needed)}/month`}</span>
+                <span>
+                  {scheme.fits === true
+                    ? "Within your budget"
+                    : scheme.fits === false
+                    ? scheme.type === "monthly"
+                      ? `Needs ${inr(scheme.monthlyDeposit)}/month`
+                      : `Needs ${inr(scheme.lumpDeposit)} one-time`
+                    : "—"}
+                </span>
               </div>
             </li>
           );
         })}
       </ul>
       <p className="calc-note">
-        The Queen Cash Certificate and Monthly Pension Scheme take a one-time
-        deposit rather than a monthly instalment — see the special schemes page.
+        The Queen Cash Certificate accepts deposits in multiples of ₹1,00,000. Effective
+        yield is a simple annualised estimate so schemes of different tenures can be
+        compared fairly — final figures are always confirmed at the branch.
       </p>
       <ResultActions
         title="Scheme comparison"
         waLines={[
-          `Monthly capacity: ${inr(value)}`,
-          ...monthlySchemes.map((scheme) => {
-            const needed = parseMonthly(scheme);
-            return `${scheme.title}: ${scheme.deposit}, ${scheme.tenure}, ${scheme.returns} — ${
-              value >= needed ? "within budget" : `needs ${inr(needed)}/month`
-            }`;
+          `Monthly budget: ${inr(monthlyBudgetNum)}`,
+          `One-time amount available: ${inr(lumpSumNum)}`,
+          ...ranked.map((scheme) => {
+            const fits = fitsBudget(scheme, { monthlyBudget: monthlyBudgetNum, lumpSum: lumpSumNum });
+            const need =
+              fits === false
+                ? scheme.type === "monthly"
+                  ? ` — needs ${inr(scheme.monthlyDeposit)}/month`
+                  : ` — needs ${inr(scheme.lumpDeposit)} one-time`
+                : fits === true
+                ? " — within budget"
+                : "";
+            return `${scheme.title}: ${scheme.deposit}, ${scheme.tenure}, ${scheme.returns}${need}`;
           }),
         ]}
         buildPdf={() =>
           downloadCompareReport({
-            capacity: value,
+            monthlyBudget: monthlyBudgetNum,
+            lumpSum: lumpSumNum,
             schemesList: schemes,
             filename: "holy-queen-scheme-comparison.pdf",
           })

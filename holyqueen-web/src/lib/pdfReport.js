@@ -11,6 +11,7 @@
 
 import { jsPDF } from "jspdf";
 import { site, strengths, assurances, trustChips } from "@/content/site";
+import { rankSchemes, pickBestValue, fitsBudget, shortLabel } from "@/lib/schemeMath";
 
 /* ---------- brand palette (mirrors src/styles/tokens.css) ---------- */
 const C = {
@@ -379,52 +380,14 @@ function rdGrowthSeries({ monthly, months, annualRatePercent, points = 5 }) {
 
 /* ---------- scheme comparison table ---------- */
 
-function parseTotalValue(returnsText) {
-  const matches = returnsText.match(/₹[\d,]+/g) || [];
-  return matches.reduce((sum, m) => sum + (Number(m.replace(/[^\d]/g, "")) || 0), 0);
-}
 
-function parseMonths(tenureText) {
-  const m = tenureText.match(/(\d+)\s*month/i);
-  if (m) return Number(m[1]);
-  const y = tenureText.match(/(\d+)\s*year/i);
-  if (y) return Number(y[1]) * 12;
-  return null;
-}
-
-function parseMonthlyDeposit(depositText) {
-  if (!depositText.includes("per month")) return null;
-  return Number(depositText.replace(/[^\d]/g, "")) || 0;
-}
-
-/** Computes an effective annualised value score so tenures of different
- * lengths can be compared fairly, then marks the strongest one. */
-function rankSchemesByValue(schemeList) {
-  return schemeList.map((scheme) => {
-    const months = parseMonths(scheme.tenure);
-    const monthlyDeposit = parseMonthlyDeposit(scheme.deposit);
-    const totalValue = parseTotalValue(scheme.returns);
-    let invested = null;
-    let effectiveAnnualPct = null;
-    if (monthlyDeposit && months) {
-      invested = monthlyDeposit * months;
-      const years = months / 12;
-      if (invested > 0 && years > 0) {
-        effectiveAnnualPct = ((totalValue - invested) / invested / years) * 100;
-      }
-    }
-    return { ...scheme, months, monthlyDeposit, invested, totalValue, effectiveAnnualPct };
-  });
-}
-
-function drawSchemeTable(doc, x, y, w, schemesRanked, { capacity, bestSlug } = {}) {
+function drawSchemeTable(doc, x, y, w, schemesRanked, { monthlyBudget, lumpSum, bestSlug } = {}) {
   let cursorY = y;
-  const rowH = 17.5;
+  const rowH = 21;
   schemesRanked.forEach((s, i) => {
     cursorY = ensureSpace(doc, cursorY, rowH + 4);
     const isBest = s.slug === bestSlug;
-    const fits =
-      capacity != null && s.monthlyDeposit != null ? capacity >= s.monthlyDeposit : null;
+    const fits = fitsBudget(s, { monthlyBudget, lumpSum });
 
     doc.setFillColor(isBest ? "#fdf3dd" : i % 2 === 0 ? C.white : C.sand);
     doc.roundedRect(x, cursorY, w, rowH, 2, 2, "F");
@@ -455,20 +418,32 @@ function drawSchemeTable(doc, x, y, w, schemesRanked, { capacity, bestSlug } = {
     if (isBest) {
       badgeText = "Best value for your money";
       badgeColor = C.goldDeep;
-    } else if (s.monthlyDeposit == null) {
-      badgeText = "One-time deposit scheme";
     } else if (fits === true) {
-      badgeText = "Within your monthly budget";
+      badgeText = s.type === "monthly" ? "Within your monthly budget" : "Within your one-time budget";
       badgeColor = C.muted;
     } else if (fits === false) {
-      badgeText = `Needs ${inr(s.monthlyDeposit)}/month`;
+      badgeText =
+        s.type === "monthly"
+          ? `Needs ${inr(s.monthlyDeposit)}/month`
+          : `Needs ${inr(s.lumpDeposit)} one-time`;
     } else {
-      badgeText = "Recurring monthly scheme";
+      badgeText = s.type === "monthly" ? "Recurring monthly scheme" : "One-time deposit scheme";
     }
     doc.setFont("helvetica", isBest ? "bold" : "normal");
     doc.setFontSize(7.4);
     doc.setTextColor(badgeColor);
     doc.text(badgeText, x + w - 6, badgeY, { align: "right" });
+
+    if (s.effectiveAnnualPct != null) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.8);
+      doc.setTextColor(C.mutedLight);
+      doc.text(
+        `Effective yield: ~${s.effectiveAnnualPct.toFixed(1)}% p.a.`,
+        x + 6,
+        cursorY + 17
+      );
+    }
 
     cursorY += rowH + 3;
   });
@@ -672,7 +647,7 @@ export async function downloadFdReport({
 
   y = ensureSpace(doc, y, 60);
   y = sectionTitle(doc, MARGIN, y, "Explore Our Other Schemes") + 6;
-  const ranked = rankSchemesByValue(schemesList);
+  const ranked = rankSchemes(schemesList);
   y = drawSchemeTable(doc, MARGIN, y, CONTENT_W, ranked, {});
   y += 6;
 
@@ -757,7 +732,7 @@ export async function downloadRdReport({
 
   y = ensureSpace(doc, y, 60);
   y = sectionTitle(doc, MARGIN, y, "Explore Our Other Schemes") + 6;
-  const ranked = rankSchemesByValue(schemesList);
+  const ranked = rankSchemes(schemesList);
   y = drawSchemeTable(doc, MARGIN, y, CONTENT_W, ranked, {});
   y += 6;
 
@@ -774,30 +749,21 @@ export async function downloadRdReport({
   doc.save(filename);
 }
 
-export async function downloadCompareReport({ capacity, schemesList, filename }) {
+export async function downloadCompareReport({ monthlyBudget, lumpSum, schemesList, filename }) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const code = refId("CMP");
   const logo = await loadLogoDataUrl();
   paperBackground(doc);
 
-  const ranked = rankSchemesByValue(schemesList);
-  const monthly = ranked.filter((s) => s.monthlyDeposit != null);
-  const best = monthly.reduce(
-    (top, s) =>
-      s.effectiveAnnualPct != null && (!top || s.effectiveAnnualPct > top.effectiveAnnualPct) ? s : top,
-    null
-  );
-  const affordable = monthly.filter((s) => s.monthlyDeposit <= capacity);
-  const bestAffordable = affordable.reduce(
-    (top, s) =>
-      s.effectiveAnnualPct != null && (!top || s.effectiveAnnualPct > top.effectiveAnnualPct) ? s : top,
-    null
-  );
+  const ranked = rankSchemes(schemesList);
+  const best = pickBestValue(ranked);
+  const affordable = ranked.filter((s) => fitsBudget(s, { monthlyBudget, lumpSum }) === true);
+  const bestAffordable = pickBestValue(affordable);
   const recommended = bestAffordable || best;
 
   let y = drawCover(doc, {
     title: "Scheme Comparison Report",
-    subtitle: `Prepared for your enquiry · Monthly capacity ${inr(capacity)}`,
+    subtitle: `Prepared for your enquiry · ${inr(monthlyBudget)}/month · ${inr(lumpSum)} one-time`,
     refCode: code,
     logoDataUrl: logo,
   });
@@ -812,10 +778,20 @@ export async function downloadCompareReport({ capacity, schemesList, filename })
           { label: "Commitment", value: pdfSafe(`${recommended.deposit}, ${recommended.tenure}`) },
           {
             label: recommended === bestAffordable ? "Fits your budget" : "Best long-term value",
-            value: recommended === bestAffordable ? "Yes" : `needs ${inr(recommended.monthlyDeposit)}/mo`,
+            value:
+              recommended === bestAffordable
+                ? "Yes"
+                : `needs ${
+                    recommended.type === "monthly"
+                      ? `${inr(recommended.monthlyDeposit)}/mo`
+                      : `${inr(recommended.lumpDeposit)} once`
+                  }`,
           },
         ]
-      : [{ label: "Monthly capacity", value: inr(capacity) }],
+      : [
+          { label: "Monthly budget", value: inr(monthlyBudget) },
+          { label: "One-time budget", value: inr(lumpSum) },
+        ],
   });
   y += 12;
 
@@ -827,11 +803,11 @@ export async function downloadCompareReport({ capacity, schemesList, filename })
     y,
     CONTENT_W,
     64,
-    monthly.map((s) => ({
-      label: s.title.replace(" Scheme", ""),
+    ranked.map((s) => ({
+      label: shortLabel(s),
       bars: [
-        { value: s.invested, colorHex: C.royal, format: inr },
-        { value: s.totalValue, colorHex: C.goldDeep, format: inr },
+        { value: s.invested ?? 0, colorHex: C.royal, format: inr },
+        { value: s.totalValue ?? 0, colorHex: C.goldDeep, format: inr },
       ],
       ribbon: best && s.slug === best.slug ? "Best value" : null,
     })),
@@ -845,7 +821,8 @@ export async function downloadCompareReport({ capacity, schemesList, filename })
   y = ensureSpace(doc, y, 60);
   y = sectionTitle(doc, MARGIN, y, "Every Scheme, Side by Side") + 6;
   y = drawSchemeTable(doc, MARGIN, y, CONTENT_W, ranked, {
-    capacity,
+    monthlyBudget,
+    lumpSum,
     bestSlug: best ? best.slug : null,
   });
   y += 6;

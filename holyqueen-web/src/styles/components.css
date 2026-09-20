@@ -1092,6 +1092,171 @@
   color: var(--accent);
 }
 
+/* ─── comparator: budgets, filters, richer scheme cards ────── */
+.comparator-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+.comparator-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-inset);
+}
+.filter-pills button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.filter-pills button:hover {
+  color: var(--text);
+}
+.filter-pills button.active {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.sort-select {
+  width: auto;
+  padding: 0.6rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.scheme-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.scheme-type-pill {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.best-badge {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.comparator-yield {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--text-subtle);
+  font-size: 0.76rem;
+}
+.comparator-list li.best {
+  opacity: 1;
+  border-color: var(--hairline-gold);
+  background: linear-gradient(120deg, var(--accent-soft), transparent 70%);
+}
+
+.calc-note-heading {
+  margin-top: 1.4rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tenure-compare {
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+.tenure-compare li {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color var(--t-fast);
+}
+.tenure-compare li.current {
+  border-color: var(--hairline-gold);
+  background: var(--accent-soft);
+}
+.tenure-compare-select {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.7rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--t-fast);
+}
+.tenure-compare-select:hover {
+  color: var(--text);
+}
+.tenure-compare-select strong {
+  color: var(--text);
+  font-size: 0.86rem;
+}
+.tenure-compare-select span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+.tenure-compare li.current .tenure-compare-select strong,
+.tenure-compare li.current .tenure-compare-select span {
+  color: var(--text);
+}
+.tenure-compare-value {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  border-left: 1px solid var(--border);
+}
+
 .calc-teaser {
   display: flex;
   align-items: center;
