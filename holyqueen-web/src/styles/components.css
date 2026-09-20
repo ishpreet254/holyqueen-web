@@ -70,6 +70,23 @@
   color: var(--accent);
   border-color: var(--border-strong);
 }
+.music-toggle[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: var(--hairline-gold);
+  background: var(--accent-soft);
+}
+.music-toggle[aria-pressed="true"] span:first-child {
+  display: inline-block;
+  animation: music-pulse 1.1s ease-in-out infinite;
+}
+@keyframes music-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.22);
+  }
+}
 
 /* ─── header additions ───────────────────────────────────── */
 @media (min-width: 981px) {
@@ -359,6 +376,9 @@
   background: var(--divider);
 }
 .mobile-theme {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   padding: 0.8rem 0.4rem 0;
 }
 .mobile-actions {
@@ -1085,6 +1105,7 @@
   color: var(--text-muted);
   font-size: 0.82rem;
 }
+
 .comparator-return {
   text-align: right;
 }

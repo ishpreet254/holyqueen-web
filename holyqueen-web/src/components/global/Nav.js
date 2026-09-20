@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { nav, utilityLinks } from "@/content/nav";
 import { site } from "@/content/site";
 import ThemeToggle from "./ThemeToggle";
+import MusicToggle from "./MusicToggle";
 
 export default function Nav() {
   const [openIndex, setOpenIndex] = useState(-1);
@@ -160,6 +161,7 @@ export default function Nav() {
               WhatsApp
             </a>
             <ThemeToggle />
+            <MusicToggle />
           </div>
         </div>
       </div>
@@ -369,6 +371,7 @@ export default function Nav() {
           ))}
           <div className="mobile-theme">
             <ThemeToggle />
+            <MusicToggle />
           </div>
         </div>
         <div className="mobile-actions">
