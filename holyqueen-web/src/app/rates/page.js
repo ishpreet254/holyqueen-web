@@ -9,7 +9,6 @@ import {
   recurringDeposit,
   pigmyDeposit,
   seniorCitizen,
-  ratesEffectiveFrom,
 } from "@/content/rates";
 import { schemes } from "@/content/schemes";
 
@@ -93,12 +92,6 @@ export default function RatesPage() {
           ])}
         />
 
-        {!ratesEffectiveFrom && (
-          <p className="inline-todo">
-            Effective-from date pending from the society — it will be printed at
-            the top of this card once confirmed.
-          </p>
-        )}
         <Disclaimer />
       </section>
 

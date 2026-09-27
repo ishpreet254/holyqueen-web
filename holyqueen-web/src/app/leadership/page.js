@@ -1,3 +1,4 @@
+import Image from "next/image";
 import PageHero from "@/components/ui/PageHero";
 import CTABand from "@/components/ui/CTABand";
 import {
@@ -27,7 +28,16 @@ export default function LeadershipPage() {
         <div className="people-grid">
           {leadership.map((person) => (
             <article className="person-card reveal" key={person.name + person.role}>
-              {publishPhotos ? null : (
+              {publishPhotos && person.photo ? (
+                <span className="person-photo-frame">
+                  <Image
+                    src={person.photo}
+                    alt={person.name}
+                    width={108}
+                    height={108}
+                  />
+                </span>
+              ) : (
                 <span className="person-crest" aria-hidden="true">
                   {person.name
                     .split(" ")

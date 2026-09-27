@@ -18,7 +18,8 @@ export const site = {
     label: "Mysuru — Saraswathipuram",
     line1: "No-2916, Kanth Raja Urs Road",
     line2: "Saraswathipuram, Mysuru-570009",
-    hours: "", // CLIENT INPUT
+    hours: "10:00 AM – 6:00 PM",
+    lunchBreak: "1:30 PM – 2:30 PM",
     mapQuery:
       "No-2916, Kanth Raja Urs Road, Saraswathipuram, Mysuru-570009",
   },

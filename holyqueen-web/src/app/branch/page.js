@@ -30,17 +30,26 @@ export default function BranchPage() {
       </section>
 
       <section className="section">
+        <SectionHeading eyebrow="Branch timing" title="When to find us." />
+        <dl className="term-list reveal">
+          <div>
+            <dt>Working hours</dt>
+            <dd>{site.branch.hours}</dd>
+          </div>
+          <div>
+            <dt>Lunch break</dt>
+            <dd>{site.branch.lunchBreak}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="section">
         <SectionHeading eyebrow="Before you come" title="What to bring." />
         <ul className="check-list reveal">
           {kycDocuments.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
-        {!site.branch.hours && (
-          <p className="inline-todo">
-            Branch working hours and holiday list pending from the society.
-          </p>
-        )}
       </section>
 
       <CTABand calculator={false} />

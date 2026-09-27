@@ -1,10 +1,13 @@
 /* Office bearers as supplied by the society.
    publishDirectNumbers stays false: the individual mobile numbers on the
    printed cards are not published on a public website without written
-   sign-off from each person. Switch to true only on that instruction. */
+   sign-off from each person. Switch to true only on that instruction.
+
+   publishPhotos stays false until clean, consistently-cropped headshots
+   are ready for everyone — flip it on once the photo work is done. */
 
 export const publishDirectNumbers = false;
-export const publishPhotos = false; // needs clean headshots, not the ID-card artwork
+export const publishPhotos = false;
 
 export const leadership = [
   { name: "Anthony Cruz J", role: "President", phone: "+917349733253" },
@@ -17,5 +20,10 @@ export const leadership = [
   },
   { name: "Infant Alwin A", role: "Director", phone: "+918867103213" },
   { name: "Annet Akshatha", role: "Director", phone: "+917349733253" },
-  { name: "Anthony Richard S", role: "Director", phone: "+918971513765" },
+  {
+    name: "Anthony Richard S",
+    role: "Director",
+    phone: "+918971513765",
+    photo: "/leadership/anthony-richard-s.jpg",
+  },
 ];

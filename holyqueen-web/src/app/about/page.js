@@ -39,12 +39,6 @@ export default function AboutPage() {
           single rupee moves, and every figure on this website can be verified at
           the counter.
         </p>
-        {!site.registrationNumber && (
-          <p className="inline-todo">
-            Registration number, date of registration and current membership
-            figure are pending from the society and will appear here.
-          </p>
-        )}
       </section>
 
       <section className="section band">

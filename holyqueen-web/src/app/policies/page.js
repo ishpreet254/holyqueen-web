@@ -12,7 +12,6 @@ export const metadata = {
 
 export default function PoliciesPage() {
   const ready = policies.filter((item) => item.body);
-  const pending = policies.filter((item) => !item.body);
 
   const faq = {
     "@context": "https://schema.org",
@@ -35,13 +34,6 @@ export default function PoliciesPage() {
 
       <section className="section">
         <Accordion items={ready} />
-        {pending.length > 0 && (
-          <p className="inline-todo">
-            Pending from the society: {pending.map((item) => item.title).join(", ")}.
-            This section publishes as soon as the officer and escalation path are
-            confirmed.
-          </p>
-        )}
         <p className="disclaimer" role="note">
           {site.disclaimer}
         </p>
